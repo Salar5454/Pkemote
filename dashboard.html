@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PK.TOOLS EMT- Dashboard</title>
+    <title>PK.TOOLS EMT - Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="dashboard-body">
     
-    <!-- Simplified Background for better performance -->
+    <!-- Animated Background Particles -->
     <div class="dashboard-bg-particles"></div>
 
     <!-- Maintenance Overlay -->
@@ -27,15 +27,26 @@
         </div>
     </div>
 
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <span>☰</span>
+    </button>
+    
+    <!-- Sidebar Toggle (Visible when sidebar is hidden) -->
+    <div class="sidebar-toggle" id="sidebarToggle">
+        <span>☰</span>
+    </div>
+
     <!-- Sidebar Layout -->
     <div class="dashboard-layout">
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon">⚡</div>
                     <h2>PK.TOOLS</h2>
                 </div>
+                <button class="sidebar-close" id="sidebarClose">×</button>
             </div>
             
             <div class="user-profile">
@@ -73,12 +84,6 @@
                             <span class="nav-text">Profile</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" data-page="settings">
-                            <span class="nav-icon">⚙️</span>
-                            <span class="nav-text">Settings</span>
-                        </a>
-                    </li>
                 </ul>
             </nav>
             
@@ -93,10 +98,15 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="content-header">
-                <button class="menu-toggle">
-                    <span>☰</span>
-                </button>
                 <h1>Dashboard</h1>
+                <div class="header-actions">
+                    <button class="refresh-btn" id="refreshDashboard">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M23 4v6h-6M1 20v-6h6" stroke-width="2"/>
+                            <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Dashboard Content -->
@@ -227,14 +237,31 @@
                         <h2>LEADERBOARD</h2>
                     </div>
                     
+                    <div class="leaderboard-controls">
+                        <div class="leaderboard-filter">
+                            <select id="leaderboardPeriod">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="all">All Time</option>
+                            </select>
+                        </div>
+                        <button class="refresh-leaderboard" id="refreshLeaderboard">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M23 4v6h-6M1 20v-6h6" stroke-width="2"/>
+                                <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
                     <div class="leaderboard-container">
                         <div class="leaderboard-header">
-                            <div class="leaderboard-col">Rank</div>
-                            <div class="leaderboard-col">User</div>
-                            <div class="leaderboard-col">Emotes Sent</div>
+                            <div class="leaderboard-col rank">Rank</div>
+                            <div class="leaderboard-col user">User</div>
+                            <div class="leaderboard-col emotes">Emotes Sent</div>
                         </div>
                         
-                        <div class="leaderboard-list">
+                        <div class="leaderboard-list" id="leaderboardList">
                             <!-- Leaderboard data will be populated dynamically -->
                         </div>
                     </div>
@@ -279,7 +306,7 @@
                         </div>
                         
                         <div class="profile-actions">
-                            <button class="action-btn">Edit Profile</button>
+                            <button class="action-btn" id="editProfileBtn">Edit Profile</button>
                         </div>
                     </div>
                 </section>
