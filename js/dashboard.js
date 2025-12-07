@@ -24,7 +24,7 @@ const firebaseConfig = {
     storageBucket: "pk-emote.firebasestorage.app",
     messagingSenderId: "268120663788",
     appId: "1:268120663788:web:d27ba2e1428c1688bce7c9"
-  };
+};
 
 console.log('Firebase config loaded:', firebaseConfig);
 
@@ -198,83 +198,59 @@ function initializeUIWithSessionData() {
         el.textContent = authData.email || 'Unknown';
     });
     
-    // Update emote stats with default values
-    const emotesTodayElement = document.getElementById('emotesToday');
-    const totalEmotesElement = document.getElementById('totalEmotes');
-    const daysActiveElement = document.getElementById('daysActive');
-    
-    if (emotesTodayElement) emotesTodayElement.textContent = '0';
-    if (totalEmotesElement) totalEmotesElement.textContent = '0';
-    if (daysActiveElement) daysActiveElement.textContent = '1';
-    
-    // Update usage bar (always show full for pro users)
-    const usageProgress = document.querySelector('.usage-progress');
-    const usageText = document.querySelector('.usage-text');
-    if (usageProgress) usageProgress.style.width = '100%';
-    if (usageText) usageText.textContent = 'Unlimited Access';
-    
     console.log('✅ UI initialized with session data');
-    showToast('Welcome! Using offline mode.', 'info');
 }
 
-// New function to update UI with user data without reinitializing everything
+// Update UI with Firebase user data
 function updateUIWithUserData(userData) {
-    // Update UI elements with Firebase data
+    console.log('🔄 Updating UI with user data:', userData);
+    
+    // Update username
     document.querySelectorAll('.username').forEach(el => {
-        el.textContent = userData.name;
+        el.textContent = userData.name || userData.email?.split('@')[0] || 'User';
     });
     
+    // Update email
     document.querySelectorAll('.user-email').forEach(el => {
-        el.textContent = userData.email;
+        el.textContent = userData.email || 'Unknown';
     });
     
-    // Update emote stats
-    const emotesTodayElement = document.getElementById('emotesToday');
-    const totalEmotesElement = document.getElementById('totalEmotes');
-    const daysActiveElement = document.getElementById('daysActive');
+    // Update stats if available
+    if (userData.emotesSentToday !== undefined) {
+        const emotesTodayElement = document.getElementById('emotesToday');
+        if (emotesTodayElement) emotesTodayElement.textContent = userData.emotesSentToday;
+    }
     
-    if (emotesTodayElement) emotesTodayElement.textContent = userData.emotesSentToday || 0;
-    if (totalEmotesElement) totalEmotesElement.textContent = userData.totalEmotes || 0;
-    if (daysActiveElement) daysActiveElement.textContent = userData.daysActive || 1;
+    if (userData.totalEmotes !== undefined) {
+        const totalEmotesElement = document.getElementById('totalEmotes');
+        if (totalEmotesElement) totalEmotesElement.textContent = userData.totalEmotes;
+    }
     
-    // Update usage bar (always show full for pro users)
-    const usageProgress = document.querySelector('.usage-progress');
-    const usageText = document.querySelector('.usage-text');
-    if (usageProgress) usageProgress.style.width = '100%';
-    if (usageText) usageText.textContent = 'Unlimited Access';
+    if (userData.daysActive !== undefined) {
+        const daysActiveElement = document.getElementById('daysActive');
+        if (daysActiveElement) daysActiveElement.textContent = userData.daysActive;
+    }
+    
+    console.log('✅ UI updated with user data');
 }
 
-// ===== SETUP REAL-TIME USER PROFILE UPDATES =====
+// Setup real-time updates for user profile
 function setupRealTimeUserProfile() {
+    console.log('🔄 Setting up real-time user profile updates');
+    
+    if (!db || !currentUserUid) {
+        console.log('❌ Cannot setup real-time updates: db or currentUserUid missing');
+        return;
+    }
+    
     try {
-        console.log('Setting up real-time user profile updates');
-        console.log('Database initialized:', !!db);
-        console.log('Current user UID:', currentUserUid);
-        
-        // Check if Firebase is available
-        if (!db) {
-            console.log('❌ Firebase not available, skipping real-time updates');
-            return;
-        }
-        
-        // Get the user UID from sessionStorage
-        const authData = JSON.parse(sessionStorage.getItem('auth'));
-        const userUid = authData?.uid;
-        
-        console.log('Setting up real-time updates for user:', userUid);
-        
-        if (!userUid) {
-            console.error('❌ User UID not found for real-time updates');
-            return;
-        }
-        
         // Unsubscribe from any existing listener
         if (unsubscribeUserListener) {
             unsubscribeUserListener();
         }
         
         // Listen for real-time updates to user profile
-        unsubscribeUserListener = onSnapshot(doc(db, 'users', userUid), (doc) => {
+        unsubscribeUserListener = onSnapshot(doc(db, 'users', currentUserUid), (doc) => {
             if (doc.exists()) {
                 const userData = doc.data();
                 console.log('🔄 Real-time user profile update received:', userData);
@@ -293,8 +269,7 @@ function setupRealTimeUserProfile() {
             console.error('❌ Real-time user profile update error:', error);
         });
         
-        console.log('✅ Real-time user profile updates enabled');
-        
+        console.log('✅ Real-time user profile updates setup completed');
     } catch (error) {
         console.error('❌ Error setting up real-time user profile updates:', error);
     }
@@ -306,8 +281,11 @@ const leaderboardContent = document.getElementById('leaderboard-content');
 const profileContent = document.getElementById('profile-content');
 const navLinks = document.querySelectorAll('.nav-link');
 const logoutBtnSidebar = document.getElementById('logoutBtnSidebar');
-const sidebar = document.getElementById('sidebar');
-const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+const modernSidebar = document.getElementById('modernSidebar');
+const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+const topNavbar = document.querySelector('.top-navbar');
+const mainWrapper = document.querySelector('.main-wrapper');
 
 // Logout Handler
 function handleLogout() {
@@ -339,29 +317,29 @@ function switchPage(page) {
         case 'dashboard':
             document.getElementById('dashboard-content')?.classList.remove('hidden');
             document.querySelector('[data-page="dashboard"]')?.parentElement.classList.add('active');
-            document.querySelector('.content-header h1').textContent = 'Dashboard';
+            document.querySelector('.page-title').textContent = 'Dashboard';
             break;
         case 'leaderboard':
             document.getElementById('leaderboard-content')?.classList.remove('hidden');
             document.querySelector('[data-page="leaderboard"]')?.parentElement.classList.add('active');
-            document.querySelector('.content-header h1').textContent = 'Leaderboard';
+            document.querySelector('.page-title').textContent = 'Leaderboard';
             // Load leaderboard data when opening leaderboard page
             loadLeaderboard();
             break;
         case 'profile':
             document.getElementById('profile-content')?.classList.remove('hidden');
             document.querySelector('[data-page="profile"]')?.parentElement.classList.add('active');
-            document.querySelector('.content-header h1').textContent = 'User Profile';
+            document.querySelector('.page-title').textContent = 'User Profile';
             break;
         default:
             document.getElementById('dashboard-content')?.classList.remove('hidden');
             document.querySelector('[data-page="dashboard"]')?.parentElement.classList.add('active');
-            document.querySelector('.content-header h1').textContent = 'Dashboard';
+            document.querySelector('.page-title').textContent = 'Dashboard';
     }
 }
 
 // Add event listeners to navigation links
-document.querySelectorAll('.nav-link').forEach(link => {
+document.querySelectorAll('.nav-link[data-page]').forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault();
         const page = link.getAttribute('data-page');
@@ -369,44 +347,55 @@ document.querySelectorAll('.nav-link').forEach(link => {
         
         // Hide sidebar on mobile after clicking a link
         if (window.innerWidth <= 768) {
-            sidebar.classList.add('auto-hidden');
-            // Also hide the mobile menu toggle
-            if (mobileMenuToggle) {
-                mobileMenuToggle.style.display = 'flex';
-            }
+            modernSidebar.classList.remove('visible');
         }
     });
 });
 
-// Mobile menu toggle functionality
-if (mobileMenuToggle) {
-    mobileMenuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('auto-hidden');
-    });
+// Modern Sidebar Toggle Functionality
+function toggleSidebar() {
+    if (window.innerWidth > 768) {
+        // Desktop: Collapse/expand sidebar
+        modernSidebar.classList.toggle('collapsed');
+        topNavbar.classList.toggle('collapsed');
+        mainWrapper.classList.toggle('collapsed');
+    } else {
+        // Mobile: Show/hide sidebar
+        modernSidebar.classList.toggle('visible');
+    }
 }
 
-// Sidebar toggle button functionality
-const sidebarToggle = document.getElementById('sidebarToggle');
-if (sidebarToggle) {
-    sidebarToggle.addEventListener('click', () => {
-        sidebar.classList.remove('auto-hidden');
-    });
+// Close sidebar on mobile
+function closeSidebar() {
+    if (window.innerWidth <= 768) {
+        modernSidebar.classList.remove('visible');
+    } else {
+        // On desktop, collapse if not already collapsed
+        if (!modernSidebar.classList.contains('collapsed')) {
+            modernSidebar.classList.add('collapsed');
+            topNavbar.classList.add('collapsed');
+            mainWrapper.classList.add('collapsed');
+        }
+    }
+}
+
+// Event listeners for sidebar toggle
+if (sidebarToggleBtn) {
+    sidebarToggleBtn.addEventListener('click', toggleSidebar);
+}
+
+if (sidebarCloseBtn) {
+    sidebarCloseBtn.addEventListener('click', closeSidebar);
 }
 
 // Auto-hide sidebar on mobile by default
 function checkMobileAndHideSidebar() {
     if (window.innerWidth <= 768) {
-        sidebar.classList.add('auto-hidden');
-        // Show the floating toggle button on mobile
-        if (sidebarToggle) {
-            sidebarToggle.style.display = 'flex';
-        }
+        modernSidebar.classList.remove('collapsed');
+        topNavbar.classList.remove('collapsed');
+        mainWrapper.classList.remove('collapsed');
     } else {
-        sidebar.classList.remove('auto-hidden');
-        // Hide the floating toggle button on desktop
-        if (sidebarToggle) {
-            sidebarToggle.style.display = 'none';
-        }
+        // On larger screens, keep the default state
     }
 }
 
@@ -415,26 +404,6 @@ checkMobileAndHideSidebar();
 
 // Check on window resize
 window.addEventListener('resize', checkMobileAndHideSidebar);
-
-// Also show/hide mobile menu toggle based on screen size
-function updateMobileToggleVisibility() {
-    if (window.innerWidth <= 768) {
-        if (mobileMenuToggle) {
-            mobileMenuToggle.style.display = 'flex';
-        }
-    } else {
-        if (mobileMenuToggle) {
-            mobileMenuToggle.style.display = 'none';
-        }
-    }
-}
-
-// Initial check
-updateMobileToggleVisibility();
-
-// Update on resize
-window.addEventListener('resize', updateMobileToggleVisibility);
-
 
 // Loader Functions
 function showLoader() {
@@ -524,19 +493,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Initialize other dashboard components
         initializeDashboardComponents();
         
-        // Add event listener to send emote button
-        const sendButton = document.getElementById('sendEmoteBtn');
-        if (sendButton) {
-            sendButton.addEventListener('click', sendEmote);
-        }
-        
-        // Also listen for Enter key in input fields
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendEmote();
-            }
-        });
-        
         console.log('✅ Dashboard ready!');
     } catch (error) {
         console.error('❌ Dashboard initialization error:', error);
@@ -612,10 +568,6 @@ async function initializeServerSelection() {
                 const selectedOption = this.options[this.selectedIndex];
                 statServer.textContent = selectedOption ? selectedOption.textContent : 'Not Selected';
             }
-            
-            // Update the server display to show only the name
-            const serverName = this.options[this.selectedIndex]?.text || 'Not Selected';
-            console.log('✅ Selected server name:', serverName);
             
             console.log('✅ Selected server:', this.value);
         });
@@ -929,6 +881,19 @@ async function sendEmote() {
         console.log('⚡ Sending emote with URL:', apiUrl);
         
         const response = await fetch(apiUrl);
+        
+        // Check if response is OK and is JSON
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response received:', text);
+            throw new Error('Received non-JSON response from server');
+        }
+        
         const result = await response.json();
         
         if (result.success) {
@@ -965,12 +930,8 @@ async function sendEmote() {
             }
             
             // Hide sidebar on mobile after sending emote
-            if (window.innerWidth <= 768 && sidebar) {
-                sidebar.classList.add('auto-hidden');
-                // Show the floating toggle button
-                if (sidebarToggle) {
-                    sidebarToggle.style.display = 'flex';
-                }
+            if (window.innerWidth <= 768 && modernSidebar) {
+                modernSidebar.classList.remove('visible');
             }
         } else {
             showToast(`❌ Failed to send emote: ${result.error}`, 'error');
