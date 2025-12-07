@@ -27,87 +27,100 @@
         </div>
     </div>
 
-    <!-- Mobile Menu Toggle -->
-    <button class="mobile-menu-toggle" id="mobileMenuToggle">
-        <span class="hamburger-icon">
-            <span class="line"></span>
-            <span class="line"></span>
-            <span class="line"></span>
-        </span>
-    </button>
-    
-    <!-- Sidebar Toggle (Visible when sidebar is hidden) -->
-    <div class="sidebar-toggle" id="sidebarToggle">
-        <span class="hamburger-icon">
-            <span class="line"></span>
-            <span class="line"></span>
-            <span class="line"></span>
-        </span>
+    <!-- Modern Sidebar -->
+    <div class="modern-sidebar" id="modernSidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">⚡</div>
+                <h2>PK.TOOLS</h2>
+            </div>
+            <button class="sidebar-close-btn" id="sidebarCloseBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="user-profile">
+            <div class="user-avatar">
+                <div class="avatar-placeholder">👤</div>
+            </div>
+            <div class="user-info">
+                <h3 class="username">Loading...</h3>
+                <p class="user-email">Loading...</p>
+                <p class="user-plan pro">Premium User</p>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="nav-item active">
+                    <a href="#" class="nav-link" data-page="dashboard">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="leaderboard">
+                        <span class="nav-icon">🏆</span>
+                        <span class="nav-text">Leaderboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-page="profile">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-text">Profile</span>
+                    </a>
+                </li>
+                <!-- Additional navigation links -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">🏠</span>
+                        <span class="nav-text">Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">ℹ️</span>
+                        <span class="nav-text">About</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">⚙️</span>
+                        <span class="nav-text">Services</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">📞</span>
+                        <span class="nav-text">Contact</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer">
+            <button id="logoutBtnSidebar" class="logout-btn" title="Logout">
+                <span class="logout-icon">🚪</span>
+                <span class="logout-text">Logout</span>
+            </button>
+        </div>
     </div>
 
-    <!-- Sidebar Layout -->
-    <div class="dashboard-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">⚡</div>
-                    <h2>PK.TOOLS</h2>
-                </div>
-                <button class="sidebar-close" id="sidebarClose">×</button>
-            </div>
-            
-            <div class="user-profile">
-                <div class="user-avatar">
-                    <div class="avatar-placeholder">👤</div>
-                </div>
-                <div class="user-info">
-                    <h3 class="username">Loading...</h3>
-                    <p class="user-email">Loading...</p>
-                    <p class="user-plan pro">Premium User</p>
-                    <div class="usage-bar">
-                        <div class="usage-progress" style="width: 100%"></div>
-                    </div>
-                    <p class="usage-text">Unlimited Access</p>
-                </div>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <ul>
-                    <li class="nav-item active">
-                        <a href="#" class="nav-link" data-page="dashboard">
-                            <span class="nav-icon">📊</span>
-                            <span class="nav-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" data-page="leaderboard">
-                            <span class="nav-icon">🏆</span>
-                            <span class="nav-text">Leaderboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" data-page="profile">
-                            <span class="nav-icon">👤</span>
-                            <span class="nav-text">Profile</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <button id="logoutBtnSidebar" class="logout-btn" title="Logout">
-                    <span class="logout-icon">🚪</span>
-                    <span class="logout-text">Logout</span>
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Top Navigation Bar -->
+        <header class="top-navbar">
+            <div class="navbar-container">
+                <button class="sidebar-toggle-btn" id="sidebarToggleBtn">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
                 </button>
-            </div>
-        </aside>
-        
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="content-header">
-                <h1>Dashboard</h1>
-                <div class="header-actions">
+                <h1 class="page-title">Dashboard</h1>
+                <div class="navbar-actions">
                     <button class="refresh-btn" id="refreshDashboard">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M23 4v6h-6M1 20v-6h6" stroke-width="2"/>
@@ -116,7 +129,10 @@
                     </button>
                 </div>
             </div>
+        </header>
 
+        <!-- Main Content Area -->
+        <main class="main-content">
             <!-- Dashboard Content -->
             <div id="dashboard-content">
                 <!-- SERVER SELECTION -->
@@ -225,13 +241,6 @@
                             </div>
                         </div>
                     </div>
-                </section>
-
-                <!-- SEND EMOTE BUTTON -->
-                <section class="panel-section" style="text-align: center; padding: 20px;">
-                    <button class="action-btn" id="sendEmoteBtn" style="padding: 15px 30px; font-size: 18px; background: linear-gradient(90deg, var(--primary-blue), var(--accent-purple)); border: none;">
-                        🚀 SEND EMOTE
-                    </button>
                 </section>
             </div>
 
