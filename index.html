@@ -88,6 +88,8 @@
         // Google Sign-In Callback
         async function handleGoogleSignIn(response) {
             try {
+                console.log('Google Sign-In response received:', response);
+                
                 // Show loading spinner
                 document.getElementById('googleLoginSpinner').classList.remove('hidden');
                 
@@ -115,6 +117,20 @@
                 
                 // Log what was actually stored
                 console.log('Stored Auth Data:', sessionStorage.getItem('auth'));
+                
+                // Verify the data was stored correctly
+                const storedData = sessionStorage.getItem('auth');
+                if (storedData) {
+                    try {
+                        const parsedData = JSON.parse(storedData);
+                        console.log('Verified stored data:', parsedData);
+                        console.log('User UID in stored data:', parsedData.uid);
+                    } catch (parseError) {
+                        console.error('Error parsing stored data:', parseError);
+                    }
+                } else {
+                    console.error('❌ Failed to store auth data in sessionStorage');
+                }
                 
                 // Redirect to dashboard
                 window.location.href = 'dashboard.html';
