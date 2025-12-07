@@ -28,58 +28,37 @@
                 <p style="color: #a0aec0; font-size: 14px; margin-top: 10px;">All plans include unlimited emotes and premium features</p>
             </div>
 
-            <form id="loginForm" class="login-form">
-                <div class="input-container">
-                    <input 
-                        type="password" 
-                        id="loginPassword" 
-                        placeholder="Enter Access Password" 
-                        required 
-                        autocomplete="off"
-                        class="login-input"
-                    >
-                    <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="2"/>
-                        <path d="M7 11V7a5 5 0 0110 0v4" stroke-width="2"/>
-                    </svg>
+            <!-- Modern Google Login Button -->
+            <div class="google-login-container">
+                <div class="divider">
+                    <span>Sign in with Google</span>
+                </div>
+                <div id="g_id_onload"
+                     data-client_id="337567943454-8k960jv92qqtkkvta04uq93im86r058b.apps.googleusercontent.com"
+                     data-context="signin"
+                     data-ux_mode="popup"
+                     data-callback="handleGoogleSignIn"
+                     data-auto_prompt="false">
                 </div>
 
-                <button type="submit" class="login-btn">
-                    <span class="btn-text">Access Dashboard</span>
-                    <span class="btn-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M5 12h14M12 5l7 7-7 7" stroke-width="2"/>
-                        </svg>
-                    </span>
-                </button>
-
-                <!-- Google Login Button -->
-                <div class="google-login-container">
-                    <div class="divider">
-                        <span>or continue with</span>
-                    </div>
-                    <div id="g_id_onload"
-                         data-client_id="337567943454-8k960jv92qqtkkvta04uq93im86r058b.apps.googleusercontent.com"
-                         data-context="signin"
-                         data-ux_mode="popup"
-                         data-callback="handleGoogleSignIn"
-                         data-auto_prompt="false">
-                    </div>
-
-                    <div class="g_id_signin"
-                         data-type="standard"
-                         data-shape="rectangular"
-                         data-theme="outline"
-                         data-text="signin_with"
-                         data-size="large"
-                         data-logo_alignment="left"
-                         data-width="300">
-                    </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="rectangular"
+                     data-theme="filled_blue"
+                     data-text="continue_with"
+                     data-size="large"
+                     data-logo_alignment="left"
+                     data-width="300">
                 </div>
+                
+                <div class="loading-spinner hidden" id="googleLoginSpinner">
+                    <div class="spinner"></div>
+                    <p>Setting up your account...</p>
+                </div>
+            </div>
 
-                <div id="loginError" class="error-message hidden"></div>
-            </form>
-
+            <div id="loginError" class="error-message hidden"></div>
+            
             <div class="social-footer">
                 <a href="#" id="telegram" class="social-link" title="Telegram">
                     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -107,25 +86,54 @@
 
     <script>
         // Google Sign-In Callback
-        function handleGoogleSignIn(response) {
+        async function handleGoogleSignIn(response) {
             try {
-                // Send the ID token to your backend for verification
-                console.log("Google Sign-In Response:", response);
+                // Show loading spinner
+                document.getElementById('googleLoginSpinner').classList.remove('hidden');
                 
-                // Here you would typically send the credential to your server
-                // For now, we'll simulate a successful login
-                sessionStorage.setItem('auth', 'true');
+                // Decode the JWT token to get user info
+                const token = response.credential;
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                
+                // Log the payload for debugging
+                console.log('Google Sign-In Payload:', payload);
+                
+                // Create user data object
+                const userData = {
+                    uid: payload.sub,
+                    email: payload.email,
+                    name: payload.name || payload.email.split('@')[0],
+                    picture: payload.picture,
+                    authenticated: true
+                };
+                
+                // Log the user data for debugging
+                console.log('User Data to Store:', userData);
+                
+                // Store user data in sessionStorage
+                sessionStorage.setItem('auth', JSON.stringify(userData));
+                
+                // Log what was actually stored
+                console.log('Stored Auth Data:', sessionStorage.getItem('auth'));
+                
+                // Redirect to dashboard
                 window.location.href = 'dashboard.html';
             } catch (error) {
                 console.error('Google Sign-In error:', error);
+                document.getElementById('googleLoginSpinner').classList.add('hidden');
+                
                 const errorMsg = document.getElementById('loginError');
                 if (errorMsg) {
-                    errorMsg.textContent = '❌ Google Sign-In Failed';
+                    errorMsg.textContent = '❌ Google Sign-In Failed. Please try again.';
                     errorMsg.classList.remove('hidden');
+                    
+                    // Hide error after 3 seconds
+                    setTimeout(() => {
+                        errorMsg.classList.add('hidden');
+                    }, 3000);
                 }
             }
         }
     </script>
-    <script type="module" src="js/login.js"></script>
 </body>
 </html>
