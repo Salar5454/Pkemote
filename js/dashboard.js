@@ -1,6 +1,6 @@
 // Import Firebase modules
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs, query, where, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs, query, where, increment, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 console.log('Firebase modules imported');
 console.log('initializeApp function:', typeof initializeApp);
@@ -306,6 +306,8 @@ const leaderboardContent = document.getElementById('leaderboard-content');
 const profileContent = document.getElementById('profile-content');
 const navLinks = document.querySelectorAll('.nav-link');
 const logoutBtnSidebar = document.getElementById('logoutBtnSidebar');
+const sidebar = document.getElementById('sidebar');
+const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 
 // Logout Handler
 function handleLogout() {
@@ -364,8 +366,43 @@ document.querySelectorAll('.nav-link').forEach(link => {
         e.preventDefault();
         const page = link.getAttribute('data-page');
         switchPage(page);
+        
+        // Hide sidebar on mobile after clicking a link
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('auto-hidden');
+        }
     });
 });
+
+// Mobile menu toggle functionality
+if (mobileMenuToggle) {
+    mobileMenuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('auto-hidden');
+    });
+}
+
+// Sidebar toggle button functionality
+const sidebarToggle = document.getElementById('sidebarToggle');
+if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.remove('auto-hidden');
+    });
+}
+
+// Auto-hide sidebar on mobile by default
+function checkMobileAndHideSidebar() {
+    if (window.innerWidth <= 768) {
+        sidebar.classList.add('auto-hidden');
+    } else {
+        sidebar.classList.remove('auto-hidden');
+    }
+}
+
+// Check on initial load
+checkMobileAndHideSidebar();
+
+// Check on window resize
+window.addEventListener('resize', checkMobileAndHideSidebar);
 
 
 // Loader Functions
@@ -530,7 +567,7 @@ async function initializeServerSelection() {
         servers.forEach(server => {
             const option = document.createElement('option');
             option.value = server.baseUrl;
-            option.textContent = `${server.name} (${server.baseUrl})`;
+            option.textContent = server.name; // Show only server name
             serverSelect.appendChild(option);
         });
         
@@ -544,6 +581,10 @@ async function initializeServerSelection() {
                 const selectedOption = this.options[this.selectedIndex];
                 statServer.textContent = selectedOption ? selectedOption.textContent : 'Not Selected';
             }
+            
+            // Update the server display to show only the name
+            const serverName = this.options[this.selectedIndex]?.text || 'Not Selected';
+            console.log('✅ Selected server name:', serverName);
             
             console.log('✅ Selected server:', this.value);
         });
@@ -732,10 +773,10 @@ async function loadEmotesForCategory(categoryId) {
         snapshot.forEach(doc => {
             const emote = doc.data();
             const emoteElement = document.createElement('div');
-            emoteElement.className = 'emote-item';
+            emoteElement.className = 'emote-card'; // Use emote-card class for consistent styling
             emoteElement.setAttribute('data-emote-id', emote.emoteId);
             emoteElement.innerHTML = `
-                <div class="emote-image-container">
+                <div class="emote-image-wrapper">
                     <img src="${emote.imageUrl}" alt="${emote.emoteId}" class="emote-image">
                 </div>
                 <div class="emote-name">${emote.emoteId}</div>
@@ -744,7 +785,7 @@ async function loadEmotesForCategory(categoryId) {
             // Add click event to select emote
             emoteElement.addEventListener('click', function() {
                 // Remove selected class from all emotes
-                document.querySelectorAll('.emote-item').forEach(e => e.classList.remove('selected'));
+                document.querySelectorAll('.emote-card').forEach(e => e.classList.remove('selected'));
                 
                 // Add selected class to clicked emote
                 this.classList.add('selected');
@@ -899,8 +940,84 @@ async function sendEmote() {
     }
 }
 
-// Placeholder functions that need to be implemented
-function loadLeaderboard() {
+// Implement the leaderboard loading function
+async function loadLeaderboard() {
     console.log('🔄 Loading leaderboard...');
-    // Implementation would go here
+    
+    if (!db) {
+        console.log('❌ Firebase not available for leaderboard');
+        return;
+    }
+    
+    try {
+        // Show loading state
+        const leaderboardList = document.getElementById('leaderboardList');
+        if (leaderboardList) {
+            leaderboardList.innerHTML = '<div class="loading-leaderboard">Loading leaderboard...</div>';
+        }
+        
+        // Get users ordered by totalEmotes (descending)
+        const usersQuery = query(
+            collection(db, 'users'),
+            orderBy('totalEmotes', 'desc'),
+            limit(50) // Limit to top 50 users
+        );
+        
+        const snapshot = await getDocs(usersQuery);
+        
+        if (!leaderboardList) {
+            console.log('❌ Leaderboard list element not found');
+            return;
+        }
+        
+        // Clear existing leaderboard
+        leaderboardList.innerHTML = '';
+        
+        if (snapshot.empty) {
+            leaderboardList.innerHTML = '<p class="no-leaderboard">No users found</p>';
+            console.log('❌ No users found for leaderboard');
+            return;
+        }
+        
+        // Add users to leaderboard
+        let rank = 1;
+        snapshot.forEach(doc => {
+            const user = doc.data();
+            
+            // Skip users with 0 emotes
+            if (user.totalEmotes <= 0) return;
+            
+            const leaderboardItem = document.createElement('div');
+            leaderboardItem.className = 'leaderboard-item';
+            leaderboardItem.innerHTML = `
+                <div class="leaderboard-col">
+                    <span class="rank-number">${rank}</span>
+                </div>
+                <div class="leaderboard-col">
+                    <div class="user-avatar-small">${user.name?.charAt(0) || user.email?.charAt(0) || 'U'}</div>
+                    <span class="user-name">${user.name || user.email?.split('@')[0] || 'Anonymous'}</span>
+                </div>
+                <div class="leaderboard-col">
+                    <span class="emote-count">${user.totalEmotes}</span>
+                </div>
+            `;
+            
+            leaderboardList.appendChild(leaderboardItem);
+            rank++;
+        });
+        
+        // If no users with emotes were found
+        if (rank === 1) {
+            leaderboardList.innerHTML = '<p class="no-leaderboard">No users with emotes found</p>';
+        }
+        
+        console.log('✅ Loaded leaderboard with', rank - 1, 'users');
+    } catch (error) {
+        console.error('❌ Error loading leaderboard:', error);
+        
+        const leaderboardList = document.getElementById('leaderboardList');
+        if (leaderboardList) {
+            leaderboardList.innerHTML = '<p class="error-leaderboard">Error loading leaderboard. Please try again.</p>';
+        }
+    }
 }
