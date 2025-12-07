@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edward's Digital Profile // System 5.0 - Active</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons for social media icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles for the high-tech, dark, neomorphic theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712; /* Deep background color */
+            color: #e2e8f0;
+            min-height: 100vh;
+            position: relative; /* Needed for absolute positioning of canvas */
+            overflow-x: hidden;
+        }
+
+        /* --- Animated Background Canvas --- */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place behind all content */
+            opacity: 0.5; /* Subtle opacity */
+        }
+        
+        /* --- Main Container: Hyper-Holographic Glass Effect --- */
+        #content-container {
+            position: relative; /* Ensure it stays above the canvas */
+            background: rgba(17, 24, 39, 0.75); /* Darker semi-transparent blue */
+            backdrop-filter: blur(12px); /* Stronger frosted glass effect */
+            border: 2px solid rgba(168, 85, 247, 0.4); /* Purple holographic border */
+            box-shadow: 0 4px 50px rgba(139, 92, 246, 0.3); /* Stronger overall glow */
+        }
+
+        /* --- Link Button Aesthetics & Animations (Holographic Pulse) --- */
+        .link-button {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background: #1f2937; /* Base dark background */
+            border: 1px solid #4b5563; /* Subtle border */
+        }
+        .link-button:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: linear-gradient(90deg, #111827 0%, #312e81 100%); /* Deep blue gradient on hover */
+            border-color: #a78bfa; /* Light purple border on hover */
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.6), 0 0 10px rgba(168, 85, 247, 1); /* Intense purple glow */
+        }
+        .link-icon {
+            filter: drop-shadow(0 0 6px #a855f7); /* Icon glow */
+        }
+
+        /* --- Profile Image Glow --- */
+        #profile-image {
+            box-shadow: 0 0 20px rgba(192, 132, 252, 0.9), 0 0 8px #c084fc;
+            border: 5px solid #a78bfa; /* Lighter, more vibrant purple ring */
+        }
+
+        /* --- Admin Panel Dark Mode (Refined) --- */
+        .admin-modal-content {
+            background-color: #0f172a; 
+            border: 1px solid #4f46e5;
+        }
+        .admin-form-group {
+            background-color: #1e293b;
+            border: 1px solid #4f46e5;
+        }
+        .admin-scroll {
+            max-height: 40vh;
+            overflow-y: auto;
+            border: 1px solid #4f46e5;
+            scrollbar-width: thin;
+            scrollbar-color: #8b5cf6 #1e293b;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-4">
+
+    <!-- ANIMATED BACKGROUND CANVAS -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- MAIN PROFILE AND LINK CONTAINER (Public View) -->
+    <div id="content-container" class="w-full max-w-md mx-auto py-12 px-6 rounded-3xl z-10">
+        
+        <!-- Profile Section -->
+        <div id="profile-section" class="flex flex-col items-center mb-10">
+            <img id="profile-image" 
+                 src="https://placehold.co/100x100/4c1d95/ffffff?text=E" 
+                 onerror="this.src='https://placehold.co/100x100/4c1d95/ffffff?text=E'"
+                 alt="Digital Avatar" 
+                 class="w-32 h-32 rounded-full object-cover shadow-2xl mb-4 transition duration-500 hover:rotate-3">
+            
+            <h1 id="display-name" class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300 mb-1 tracking-wider uppercase">LOADING...</h1>
+            <p id="short-bio" class="text-indigo-300 text-center text-xl mb-6 font-light">SYSTEM ONLINE // PROTOCOL ACTIVE</p>
+        </div>
+
+        <!-- Links Container -->
+        <div id="links-container" class="space-y-5">
+            <!-- Links will be dynamically inserted here -->
+            <div class="text-center text-sm text-gray-500 p-4" id="loading-message">Connecting to data node...</div>
+        </div>
+        
+        <!-- TTS Message Indicator -->
+        <div id="tts-status" class="mt-8 text-center text-sm text-purple-400 hidden">
+             <span class="animate-pulse">🔊 Playing welcome message... [Kore Voice]</span>
+        </div>
+    </div>
+
+    <!-- Admin Access Button -->
+    <button id="admin-access-btn" onclick="toggleAdminPanel(true)" class="fixed bottom-4 right-4 bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg transition duration-300 hover:scale-110 z-20">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.82 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.82 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.82-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.82-3.31 2.37-2.37.996.608 2.296.236 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+    </button>
+    
+    <!-- ADMIN PANEL OVERLAY - Content is the same as previous iteration, ensure Z-index is high -->
+    <div id="admin-panel" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-80 backdrop-blur-md z-50 hidden p-4 sm:p-8" onclick="if(event.target.id === 'admin-panel') toggleAdminPanel(false)">
+        <div class="admin-modal-content rounded-xl shadow-2xl w-full max-w-2xl mx-auto mt-4 sm:mt-8 p-6 sm:p-8 transform transition-all duration-300" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6 border-b border-indigo-700 pb-4">
+                <h2 class="text-2xl font-extrabold text-purple-400">System Access (Admin Console)</h2>
+                <button onclick="toggleAdminPanel(false)" class="text-gray-400 hover:text-red-500 transition duration-150">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Admin Login Form -->
+            <form id="admin-login-form" class="space-y-4 mb-8 p-4 admin-form-group rounded-lg">
+                <h3 class="text-xl font-semibold text-indigo-400 border-b border-indigo-600 pb-2 mb-4">Authorize Access</h3>
+                <div>
+                    <label for="admin-email" class="block text-sm font-medium text-gray-300">Email</label>
+                    <input type="email" id="admin-email" placeholder="Access ID" required class="mt-1 block w-full rounded-md shadow-sm p-2 border bg-gray-700 border-gray-600 text-white focus:ring-purple-500 focus:border-purple-500">
+                </div>
+                <div>
+                    <label for="admin-password" class="block text-sm font-medium text-gray-300">Password</label>
+                    <input type="password" id="admin-password" placeholder="Key" required class="mt-1 block w-full rounded-md shadow-sm p-2 border bg-gray-700 border-gray-600 text-white focus:ring-purple-500 focus:border-purple-500">
+                </div>
+                <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-md text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition duration-200">
+                    Log In (Authenticate)
+                </button>
+            </form>
+            
+            <!-- ADMIN CONTENT - HIDDEN until logged in with correct UID -->
+            <div id="admin-content-area" class="space-y-8 hidden">
+                <form id="profile-form" class="space-y-4 p-4 admin-form-group rounded-lg">
+                    <h3 class="text-xl font-semibold text-purple-400 border-b border-purple-600 pb-2 mb-4">Profile Configuration</h3>
+                    <div>
+                        <label for="admin-name" class="block text-sm font-medium text-gray-300">Display Name</label>
+                        <input type="text" id="admin-name" class="mt-1 block w-full rounded-md shadow-sm p-2 border bg-gray-700 border-gray-600 text-white">
+                    </div>
+                    <div>
+                        <label for="admin-bio" class="block text-sm font-medium text-gray-300">Short Bio / Status</label>
+                        <textarea id="admin-bio" rows="2" class="mt-1 block w-full rounded-md shadow-sm p-2 border bg-gray-700 border-gray-600 text-white"></textarea>
+                    </div>
+                    <div>
+                        <label for="admin-image-url" class="block text-sm font-medium text-gray-300">Profile Image URL</label>
+                        <input type="url" id="admin-image-url" class="mt-1 block w-full rounded-md shadow-sm p-2 border bg-gray-700 border-gray-600 text-white">
+                    </div>
+                    <button type="button" onclick="updateProfile()" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-md text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 transition duration-200">
+                        Update Profile Data
+                    </button>
+                </form>
+
+                <h3 class="text-xl font-semibold text-purple-400 border-b border-purple-600 pb-2 mb-4">Link Matrix Management (Scrollable)</h3>
+
+                <!-- Existing Links List (Scrollable Area) -->
+                <div id="admin-links-list" class="space-y-3 admin-scroll mb-6 p-2 admin-form-group">
+                    <!-- Editable links will be inserted here -->
+                </div>
+
+                <!-- Add New Link Form -->
+                <form id="add-link-form" class="space-y-3 p-4 admin-form-group rounded-lg">
+                    <h4 class="text-lg font-medium text-indigo-400">Add New Link Node</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input type="text" id="new-title" placeholder="Node Title (e.g., YouTube)" required class="block w-full rounded-md shadow-sm p-2 border bg-gray-700 border-gray-600 text-white text-sm">
+                        <input type="url" id="new-url" placeholder="Target URL (https://...)" required class="block w-full rounded-md shadow-sm p-2 border bg-gray-700 border-gray-600 text-white text-sm">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input type="text" id="new-icon" placeholder="Lucide Icon Name (e.g., youtube)" class="block w-full rounded-md shadow-sm p-2 border bg-gray-700 border-gray-600 text-white text-sm">
+                        <input type="number" id="new-order" placeholder="Display Order (1, 2, 3...)" value="10" class="block w-full rounded-md shadow-sm p-2 border bg-gray-700 border-gray-600 text-white text-sm">
+                    </div>
+                    <button type="submit" class="w-full py-2 px-4 border border-transparent shadow-md text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition duration-200">
+                        + Add New Link
+                    </button>
+                </form>
+            </div>
+            
+            <div id="admin-message" class="mt-4 text-sm text-red-400 hidden"></div>
+        </div>
+    </div>
+
+
+    <!-- Load Firebase SDKs and custom logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // --- 1. CONFIGURATION AND INITIALIZATION ---
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        // FALLBACK CONFIGURATION (Used if environment vars are not present)
+        const defaultUserConfig = {
+            apiKey: "AIzaSyCrhg4ovOYRsTgsBdNzK5tIboYfyGmczNs",
+            authDomain: "pk-links-569da.firebaseapp.com",
+            projectId: "pk-links-569da",
+            storageBucket: "pk-links-569da.firebasestorage.app",
+            messagingSenderId: "934778113424",
+            appId: "1:934778113424:web:58cb543d349f688067b715"
+        };
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : defaultUserConfig;
+        
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // CRUCIAL: Your specified Admin User ID
+        const DESIGNATED_ADMIN_ID = 'FtBMuuFmXFUgo23wTW3aDvJL4t63';
+        const PUBLIC_CONFIG_PATH = `artifacts/${appId}/public/data/bio_link_config/main_config`;
+
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let isAdmin = false; 
+        let isAuthReady = false;
+        let currentLinks = []; 
+        let ttsPlayed = false;
+
+        setLogLevel('Debug');
+
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+        } catch (error) {
+            console.error("Firebase Initialization Error:", error);
+            document.getElementById('loading-message').textContent = 'Error loading application: Check console for details.';
+        }
+
+        /** Utility to create a URL-friendly slug */
+        const slugify = (text) => {
+            return text
+                .toLowerCase()
+                .trim()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/[\s_-]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        };
+
+        // --- 2. CANVAS PARTICLE ANIMATION ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let width, height;
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = document.body.scrollHeight > window.innerHeight ? document.body.scrollHeight : window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 1.5 + 0.5; // Small size
+                this.speedX = Math.random() * 0.2 - 0.1; // Very slow movement
+                this.speedY = Math.random() * 0.2 - 0.1;
+                this.color = 'rgba(168, 85, 247, ' + (Math.random() * 0.5 + 0.2) + ')'; // Purple, subtle opacity
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Wrap around screen
+                if (this.x > width) this.x = 0;
+                if (this.x < 0) this.x = width;
+                if (this.y > height) this.y = 0;
+                if (this.y < 0) this.y = height;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const numberOfParticles = (width * height) / 10000; // Density based on screen size
+            for (let i = 0; i < numberOfParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height); // Clear the canvas
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            requestAnimationFrame(animateCanvas);
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+        });
+
+        // Initialize on load
+        window.onload = function() {
+            resizeCanvas();
+            initParticles();
+            animateCanvas(); // Start animation loop
+        }
+        
+        // --- 3. TTS API AND AUDIO FUNCTIONS (PCM to WAV conversion) ---
+
+        /** Converts a Base64 string to an ArrayBuffer. */
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        /** Writes a string to a DataView buffer */
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        /** Converts PCM (Pulse Code Modulation) audio data to a playable WAV Blob. */
+        function pcmToWav(pcm16, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcm16.length * 2);
+            const view = new DataView(buffer);
+            
+            // RIFF chunk descriptor
+            writeString(view, 0, 'RIFF'); // Chunk ID
+            view.setUint32(4, 36 + pcm16.length * 2, true); // Chunk Size
+            writeString(view, 8, 'WAVE'); // Format
+
+            // FMT sub-chunk
+            writeString(view, 12, 'fmt '); // Sub-chunk 1 ID
+            view.setUint32(16, 16, true); // Sub-chunk 1 Size (16 for PCM)
+            view.setUint16(20, 1, true); // Audio Format (1 for PCM)
+            view.setUint16(22, 1, true); // Number of Channels (Mono)
+            view.setUint32(24, sampleRate, true); // Sample Rate
+            view.setUint32(28, sampleRate * 2, true); // Byte Rate (SampleRate * Channels * BitsPerSample/8)
+            view.setUint16(32, 2, true); // Block Align (Channels * BitsPerSample/8)
+            view.setUint16(34, 16, true); // Bits Per Sample (16)
+
+            // DATA sub-chunk
+            writeString(view, 36, 'data'); // Sub-chunk 2 ID
+            view.setUint32(40, pcm16.length * 2, true); // Sub-chunk 2 Size (NumSamples * Channels * BitsPerSample/8)
+
+            // Write the PCM data
+            for (let i = 0; i < pcm16.length; i++) {
+                view.setInt16(44 + i * 2, pcm16[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        /** Fetches audio from the TTS API and plays it. */
+        async function generateAndPlayWelcomeMessage() {
+            if (ttsPlayed) return; // Prevent double playing
+            ttsPlayed = true;
+
+            const ttsStatusEl = document.getElementById('tts-status');
+            ttsStatusEl.classList.remove('hidden');
+
+            const payload = {
+                contents: [{
+                    parts: [{ text: "Say in a professional, slightly robotic tone: Digital profile version five point zero. All systems
