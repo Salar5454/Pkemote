@@ -370,6 +370,10 @@ document.querySelectorAll('.nav-link').forEach(link => {
         // Hide sidebar on mobile after clicking a link
         if (window.innerWidth <= 768) {
             sidebar.classList.add('auto-hidden');
+            // Also hide the mobile menu toggle
+            if (mobileMenuToggle) {
+                mobileMenuToggle.style.display = 'flex';
+            }
         }
     });
 });
@@ -393,8 +397,16 @@ if (sidebarToggle) {
 function checkMobileAndHideSidebar() {
     if (window.innerWidth <= 768) {
         sidebar.classList.add('auto-hidden');
+        // Show the floating toggle button on mobile
+        if (sidebarToggle) {
+            sidebarToggle.style.display = 'flex';
+        }
     } else {
         sidebar.classList.remove('auto-hidden');
+        // Hide the floating toggle button on desktop
+        if (sidebarToggle) {
+            sidebarToggle.style.display = 'none';
+        }
     }
 }
 
@@ -403,6 +415,25 @@ checkMobileAndHideSidebar();
 
 // Check on window resize
 window.addEventListener('resize', checkMobileAndHideSidebar);
+
+// Also show/hide mobile menu toggle based on screen size
+function updateMobileToggleVisibility() {
+    if (window.innerWidth <= 768) {
+        if (mobileMenuToggle) {
+            mobileMenuToggle.style.display = 'flex';
+        }
+    } else {
+        if (mobileMenuToggle) {
+            mobileMenuToggle.style.display = 'none';
+        }
+    }
+}
+
+// Initial check
+updateMobileToggleVisibility();
+
+// Update on resize
+window.addEventListener('resize', updateMobileToggleVisibility);
 
 
 // Loader Functions
@@ -782,7 +813,7 @@ async function loadEmotesForCategory(categoryId) {
                 <div class="emote-name">${emote.emoteId}</div>
             `;
             
-            // Add click event to select emote
+            // Add click event to select emote and automatically send it
             emoteElement.addEventListener('click', function() {
                 // Remove selected class from all emotes
                 document.querySelectorAll('.emote-card').forEach(e => e.classList.remove('selected'));
@@ -798,6 +829,9 @@ async function loadEmotesForCategory(categoryId) {
                 if (statEmote) statEmote.textContent = emote.emoteId;
                 
                 console.log('✅ Selected emote:', emote.emoteId);
+                
+                // Automatically send the emote
+                sendEmote();
             });
             
             emoteGrid.appendChild(emoteElement);
@@ -927,6 +961,15 @@ async function sendEmote() {
                     }
                 } catch (error) {
                     console.error('❌ Error updating user stats:', error);
+                }
+            }
+            
+            // Hide sidebar on mobile after sending emote
+            if (window.innerWidth <= 768 && sidebar) {
+                sidebar.classList.add('auto-hidden');
+                // Show the floating toggle button
+                if (sidebarToggle) {
+                    sidebarToggle.style.display = 'flex';
                 }
             }
         } else {
