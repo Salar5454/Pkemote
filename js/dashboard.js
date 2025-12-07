@@ -1,7 +1,6 @@
-// Simple version that relies primarily on session storage data
 // Import Firebase modules
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs, query, where, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 console.log('Firebase modules imported');
 console.log('initializeApp function:', typeof initializeApp);
@@ -445,6 +444,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Initialize other dashboard components
         initializeDashboardComponents();
         
+        // Add event listener to send emote button
+        const sendButton = document.getElementById('sendEmoteBtn');
+        if (sendButton) {
+            sendButton.addEventListener('click', sendEmote);
+        }
+        
+        // Also listen for Enter key in input fields
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendEmote();
+            }
+        });
+        
         console.log('✅ Dashboard ready!');
     } catch (error) {
         console.error('❌ Dashboard initialization error:', error);
@@ -467,25 +479,412 @@ function initializeDashboardComponents() {
     initializeStats();
 }
 
-// Placeholder functions for other dashboard components
-function initializeServerSelection() {
-    // This would be implemented with your server data
-    console.log('🔄 Server selection initialized');
+// Implement the actual Firebase functions instead of placeholders
+async function initializeServerSelection() {
+    console.log('🔄 Initializing server selection');
+    
+    if (!db) {
+        console.log('❌ Firebase not available for server selection');
+        return;
+    }
+    
+    try {
+        const serversCol = collection(db, 'servers');
+        const snapshot = await getDocs(serversCol);
+        
+        const serverSelect = document.getElementById('serverSelect');
+        if (!serverSelect) {
+            console.log('❌ Server select element not found');
+            return;
+        }
+        
+        // Clear existing options
+        serverSelect.innerHTML = '<option value="">Select a Server...</option>';
+        
+        if (snapshot.empty) {
+            console.log('❌ No servers found in database');
+            return;
+        }
+        
+        const servers = [];
+        snapshot.forEach(doc => {
+            servers.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Sort by order field
+        servers.sort((a, b) => (a.order || 0) - (b.order || 0));
+        
+        // Add servers to dropdown
+        servers.forEach(server => {
+            const option = document.createElement('option');
+            option.value = server.baseUrl;
+            option.textContent = `${server.name} (${server.baseUrl})`;
+            serverSelect.appendChild(option);
+        });
+        
+        // Add event listener for server selection
+        serverSelect.addEventListener('change', function() {
+            selectedServerUrl = this.value;
+            
+            // Update stats
+            const statServer = document.getElementById('statServer');
+            if (statServer) {
+                const selectedOption = this.options[this.selectedIndex];
+                statServer.textContent = selectedOption ? selectedOption.textContent : 'Not Selected';
+            }
+            
+            console.log('✅ Selected server:', this.value);
+        });
+        
+        console.log('✅ Server selection initialized with', servers.length, 'servers');
+    } catch (error) {
+        console.error('❌ Error initializing server selection:', error);
+    }
 }
 
 function initializeUidInputs() {
-    // This would be implemented with your UID input logic
-    console.log('🔄 UID inputs initialized');
+    console.log('🔄 Initializing UID inputs');
+    
+    // Add event listener to add UID button
+    const addUidBtn = document.getElementById('addUidBtn');
+    if (addUidBtn) {
+        addUidBtn.addEventListener('click', addUidInput);
+    }
+    
+    // Add event listeners to existing UID inputs
+    const uidInputs = document.querySelectorAll('.uid-input');
+    uidInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            // Update stats when UID is entered
+            const statUids = document.getElementById('statUids');
+            if (statUids) statUids.textContent = uidCount;
+        });
+    });
+    
+    console.log('✅ UID inputs initialized');
 }
 
-function loadEmoteCategories() {
-    // This would be implemented with your emote category loading logic
-    console.log('🔄 Emote categories loaded');
+// Add UID input field
+function addUidInput() {
+    const uidContainer = document.getElementById('uidContainer');
+    if (!uidContainer) return;
+    
+    // Check if we've reached the maximum number of UIDs
+    if (uidCount >= maxUids) {
+        showToast('Maximum of 5 UIDs allowed', 'error');
+        return;
+    }
+    
+    uidCount++;
+    
+    const uidDiv = document.createElement('div');
+    uidDiv.className = 'input-group-box uid-group';
+    uidDiv.innerHTML = `
+        <label>TARGET UID ${uidCount} <span class="required">*</span></label>
+        <input type="text" id="uid${uidCount}" placeholder="Enter UID (9-12 digits)" class="config-input uid-input" pattern="[0-9]{9,12}" required>
+        <button class="remove-uid-btn" data-uid="${uidCount}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+            </svg>
+        </button>
+    `;
+    
+    uidContainer.appendChild(uidDiv);
+    
+    // Add event listener to remove button
+    const removeBtn = uidDiv.querySelector('.remove-uid-btn');
+    removeBtn.addEventListener('click', function() {
+        uidDiv.remove();
+        uidCount--;
+    });
+    
+    // Update stats
+    const statUids = document.getElementById('statUids');
+    if (statUids) statUids.textContent = uidCount;
+}
+
+async function loadEmoteCategories() {
+    console.log('🔄 Loading emote categories');
+    
+    if (!db) {
+        console.log('❌ Firebase not available for emote categories');
+        return;
+    }
+    
+    try {
+        const categoriesCol = collection(db, 'categories');
+        const snapshot = await getDocs(categoriesCol);
+        
+        const categoryTabs = document.getElementById('categoryTabs');
+        if (!categoryTabs) {
+            console.log('❌ Category tabs element not found');
+            return;
+        }
+        
+        // Clear existing categories
+        categoryTabs.innerHTML = '';
+        
+        if (snapshot.empty) {
+            console.log('❌ No categories found in database');
+            categoryTabs.innerHTML = '<p class="no-categories">No categories available</p>';
+            return;
+        }
+        
+        const categories = [];
+        snapshot.forEach(doc => {
+            categories.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Sort by order field
+        categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+        
+        // Add categories to tabs
+        categories.forEach((category, index) => {
+            const tab = document.createElement('button');
+            tab.className = `category-tab ${index === 0 ? 'active' : ''}`;
+            tab.setAttribute('data-category', category.id);
+            tab.innerHTML = `
+                <span class="category-icon">${category.icon || '🎨'}</span>
+                <span class="category-name">${category.name}</span>
+            `;
+            
+            categoryTabs.appendChild(tab);
+            
+            // Load emotes for the first category immediately
+            if (index === 0) {
+                currentCategory = category.id;
+                loadEmotesForCategory(category.id);
+            }
+        });
+        
+        // Add event listeners to category tabs
+        document.querySelectorAll('.category-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Load emotes for selected category
+                const categoryId = this.getAttribute('data-category');
+                currentCategory = categoryId;
+                loadEmotesForCategory(categoryId);
+            });
+        });
+        
+        console.log('✅ Loaded', categories.length, 'emote categories');
+    } catch (error) {
+        console.error('❌ Error loading emote categories:', error);
+    }
+}
+
+async function loadEmotesForCategory(categoryId) {
+    console.log('🔄 Loading emotes for category:', categoryId);
+    
+    if (!db) {
+        console.log('❌ Firebase not available for emotes');
+        return;
+    }
+    
+    try {
+        // Show loading state
+        const emoteGrid = document.getElementById('emoteGrid');
+        if (emoteGrid) {
+            emoteGrid.innerHTML = '<div class="loading-emotes">Loading emotes...</div>';
+        }
+        
+        // Query emotes for the selected category
+        const emotesQuery = query(
+            collection(db, 'emotes'),
+            where('category', '==', categoryId)
+        );
+        
+        const snapshot = await getDocs(emotesQuery);
+        
+        if (!emoteGrid) {
+            console.log('❌ Emote grid element not found');
+            return;
+        }
+        
+        // Clear existing emotes
+        emoteGrid.innerHTML = '';
+        
+        if (snapshot.empty) {
+            emoteGrid.innerHTML = '<p class="no-emotes">No emotes available in this category</p>';
+            console.log('❌ No emotes found for category:', categoryId);
+            return;
+        }
+        
+        // Add emotes to grid
+        snapshot.forEach(doc => {
+            const emote = doc.data();
+            const emoteElement = document.createElement('div');
+            emoteElement.className = 'emote-item';
+            emoteElement.setAttribute('data-emote-id', emote.emoteId);
+            emoteElement.innerHTML = `
+                <div class="emote-image-container">
+                    <img src="${emote.imageUrl}" alt="${emote.emoteId}" class="emote-image">
+                </div>
+                <div class="emote-name">${emote.emoteId}</div>
+            `;
+            
+            // Add click event to select emote
+            emoteElement.addEventListener('click', function() {
+                // Remove selected class from all emotes
+                document.querySelectorAll('.emote-item').forEach(e => e.classList.remove('selected'));
+                
+                // Add selected class to clicked emote
+                this.classList.add('selected');
+                
+                // Store selected emote ID
+                selectedEmoteId = emote.emoteId;
+                
+                // Update stats
+                const statEmote = document.getElementById('statEmote');
+                if (statEmote) statEmote.textContent = emote.emoteId;
+                
+                console.log('✅ Selected emote:', emote.emoteId);
+            });
+            
+            emoteGrid.appendChild(emoteElement);
+        });
+        
+        console.log('✅ Loaded', snapshot.size, 'emotes for category:', categoryId);
+    } catch (error) {
+        console.error('❌ Error loading emotes for category:', categoryId, error);
+        
+        const emoteGrid = document.getElementById('emoteGrid');
+        if (emoteGrid) {
+            emoteGrid.innerHTML = '<p class="error-emotes">Error loading emotes. Please try again.</p>';
+        }
+    }
 }
 
 function initializeStats() {
     // Stats are already initialized in initializeUserProfile
     console.log('🔄 Stats initialized');
+}
+
+async function sendEmote() {
+    console.log('🔄 Sending emote');
+    
+    // Get form values
+    const serverSelect = document.getElementById('serverSelect');
+    const teamCodeInput = document.getElementById('teamCode');
+    const uidInputs = document.querySelectorAll('.uid-input');
+    
+    if (!serverSelect || !teamCodeInput) {
+        showToast('❌ Form elements not found', 'error');
+        return;
+    }
+    
+    const serverUrl = serverSelect.value;
+    const teamCode = teamCodeInput.value;
+    
+    // Validate inputs
+    if (!serverUrl) {
+        showToast('❌ Please select a server', 'error');
+        return;
+    }
+    
+    if (!teamCode) {
+        showToast('❌ Please enter a team code', 'error');
+        return;
+    }
+    
+    // Collect UIDs
+    const uids = [];
+    uidInputs.forEach(input => {
+        if (input.value.trim()) {
+            // Validate UID format (9-12 digits)
+            if (!/^\d{9,12}$/.test(input.value.trim())) {
+                showToast('❌ Invalid UID format. Must be 9-12 digits.', 'error');
+                return;
+            }
+            uids.push(input.value.trim());
+        }
+    });
+    
+    if (uids.length === 0) {
+        showToast('❌ Please enter at least one UID', 'error');
+        return;
+    }
+    
+    if (!currentCategory) {
+        showToast('❌ Please select a category', 'error');
+        return;
+    }
+    
+    if (!selectedEmoteId) {
+        showToast('❌ Please select an emote', 'error');
+        return;
+    }
+    
+    // Show loading spinner
+    showLoader();
+    
+    try {
+        // Build query parameters
+        const params = new URLSearchParams({
+            server: serverUrl,
+            tc: teamCode,
+            emote_id: selectedEmoteId
+        });
+        
+        // Add UIDs
+        uids.forEach((uid, index) => {
+            params.append(`uid${index + 1}`, uid);
+        });
+        
+        // Make API call to Netlify function
+        const apiUrl = `/api/send-emote?${params.toString()}`;
+        console.log('⚡ Sending emote with URL:', apiUrl);
+        
+        const response = await fetch(apiUrl);
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast('✅ Emote sent successfully!', 'success');
+            
+            // Update user stats in Firebase
+            if (db && currentUserUid) {
+                try {
+                    const userDocRef = doc(db, 'users', currentUserUid);
+                    
+                    // Increment emote counts
+                    await setDoc(userDocRef, {
+                        emotesSentToday: increment(1),
+                        totalEmotes: increment(1),
+                        lastEmoteSent: new Date().toISOString()
+                    }, { merge: true });
+                    
+                    // Update UI stats
+                    const emotesTodayElement = document.getElementById('emotesToday');
+                    const totalEmotesElement = document.getElementById('totalEmotes');
+                    
+                    if (emotesTodayElement) {
+                        const current = parseInt(emotesTodayElement.textContent) || 0;
+                        emotesTodayElement.textContent = current + 1;
+                    }
+                    
+                    if (totalEmotesElement) {
+                        const current = parseInt(totalEmotesElement.textContent) || 0;
+                        totalEmotesElement.textContent = current + 1;
+                    }
+                } catch (error) {
+                    console.error('❌ Error updating user stats:', error);
+                }
+            }
+        } else {
+            showToast(`❌ Failed to send emote: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error sending emote:', error);
+        showToast('❌ Network error. Please try again.', 'error');
+    } finally {
+        hideLoader();
+    }
 }
 
 // Placeholder functions that need to be implemented
