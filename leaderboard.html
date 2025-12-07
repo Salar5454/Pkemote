@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - PK.TOOLS EMT</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    
+    <!-- Reduced Background (1 particle instead of 3) -->
+    <div class="dashboard-bg-particles">
+        <div class="bg-particle"></div>
+    </div>
+
+    <!-- Maintenance Overlay -->
+    <div id="maintenanceOverlay" class="maintenance-overlay hidden">
+        <div class="maintenance-box">
+            <div class="maintenance-icon">🛠️</div>
+            <h2>Under Maintenance</h2>
+            <p id="maintenanceMsg">System is being upgraded. Please check back later.</p>
+            <a href="#" id="maintenanceTG" class="maintenance-btn">
+                <span>Join Telegram</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke-width="2"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- Sidebar Layout -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">⚡</div>
+                    <h2>PK.TOOLS</h2>
+                </div>
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <div class="avatar-placeholder">👤</div>
+                </div>
+                <div class="user-info">
+                    <h3 class="username">User</h3>
+                    <p class="user-plan free">Free Plan</p>
+                    <div class="usage-bar">
+                        <div class="usage-progress" style="width: 30%"></div>
+                    </div>
+                    <p class="usage-text">30/100 emotes today</p>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link" data-page="dashboard">
+                            <span class="nav-icon">📊</span>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="#" class="nav-link" data-page="leaderboard">
+                            <span class="nav-icon">🏆</span>
+                            <span class="nav-text">Leaderboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link" data-page="profile">
+                            <span class="nav-icon">👤</span>
+                            <span class="nav-text">Profile</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="settings">
+                            <span class="nav-icon">⚙️</span>
+                            <span class="nav-text">Settings</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link upgrade-link" data-page="upgrade">
+                            <span class="nav-icon">🚀</span>
+                            <span class="nav-text">Upgrade to Pro</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="logout-btn" title="Logout">
+                    <span class="logout-icon">🚪</span>
+                    <span class="logout-text">Logout</span>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <button class="menu-toggle">
+                    <span>☰</span>
+                </button>
+                <h1>Leaderboard</h1>
+            </div>
+
+            <!-- Leaderboard Content -->
+            <div id="leaderboard-content">
+                <section class="panel-section">
+                    <div class="section-title">
+                        <div class="title-icon-wrapper">
+                            <span style="font-size: 20px;">🏆</span>
+                        </div>
+                        <h2>TOP EMOTE SENDERS</h2>
+                    </div>
+                    
+                    <div class="leaderboard-container">
+                        <div class="leaderboard-header">
+                            <div class="leaderboard-col">Rank</div>
+                            <div class="leaderboard-col">User</div>
+                            <div class="leaderboard-col">Emotes Sent</div>
+                        </div>
+                        
+                        <div class="leaderboard-list">
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-col">1</div>
+                                <div class="leaderboard-col">
+                                    <div class="user-avatar-small">👑</div>
+                                    <span>EmoteMaster99</span>
+                                    <span class="user-badge pro">PRO</span>
+                                </div>
+                                <div class="leaderboard-col">25,420</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-col">2</div>
+                                <div class="leaderboard-col">
+                                    <div class="user-avatar-small">🔥</div>
+                                    <span>ProGamer123</span>
+                                    <span class="user-badge pro">PRO</span>
+                                </div>
+                                <div class="leaderboard-col">18,890</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-col">3</div>
+                                <div class="leaderboard-col">
+                                    <div class="user-avatar-small">⚡</div>
+                                    <span>FastSender</span>
+                                    <span class="user-badge free">FREE</span>
+                                </div>
+                                <div class="leaderboard-col">15,750</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-col">4</div>
+                                <div class="leaderboard-col">
+                                    <div class="user-avatar-small">🌟</div>
+                                    <span>EmoteKing</span>
+                                    <span class="user-badge pro">PRO</span>
+                                </div>
+                                <div class="leaderboard-col">12,420</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-col">5</div>
+                                <div class="leaderboard-col">
+                                    <div class="user-avatar-small">💎</div>
+                                    <span>DiamondUser</span>
+                                    <span class="user-badge free">FREE</span>
+                                </div>
+                                <div class="leaderboard-col">9,870</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-col">6</div>
+                                <div class="leaderboard-col">
+                                    <div class="user-avatar-small">🚀</div>
+                                    <span>RocketUser</span>
+                                    <span class="user-badge free">FREE</span>
+                                </div>
+                                <div class="leaderboard-col">7,540</div>
+                            </div>
+                            <div class="leaderboard-item">
+                                <div class="leaderboard-col">7</div>
+                                <div class="leaderboard-col">
+                                    <div class="user-avatar-small">👾</div>
+                                    <span>GameMaster</span>
+                                    <span class="user-badge pro">PRO</span>
+                                </div>
+                                <div class="leaderboard-col">6,210</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="leaderboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-value">127</div>
+                            <div class="stat-label">Total Users</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">1.2M</div>
+                            <div class="stat-label">Total Emotes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">8,420</div>
+                            <div class="stat-label">Avg. Daily</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-overlay hidden">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+        </div>
+        <p class="loading-text">Loading...</p>
+    </div>
+
+    <script type="module" src="js/leaderboard.js"></script>
+</body>
+</html>

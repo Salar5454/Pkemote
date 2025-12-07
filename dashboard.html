@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PK.TOOLS EMT- Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+    
+    <!-- Simplified Background for better performance -->
+    <div class="dashboard-bg-particles"></div>
+
+    <!-- Maintenance Overlay -->
+    <div id="maintenanceOverlay" class="maintenance-overlay hidden">
+        <div class="maintenance-box">
+            <div class="maintenance-icon">🛠️</div>
+            <h2>Under Maintenance</h2>
+            <p id="maintenanceMsg">System is being upgraded. Please check back later.</p>
+            <a href="#" id="maintenanceTG" class="maintenance-btn">
+                <span>Join Telegram</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke-width="2"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- Sidebar Layout -->
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">⚡</div>
+                    <h2>PK.TOOLS</h2>
+                </div>
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <div class="avatar-placeholder">👤</div>
+                </div>
+                <div class="user-info">
+                    <h3 class="username">Loading...</h3>
+                    <p class="user-plan pro">Premium User</p>
+                    <div class="usage-bar">
+                        <div class="usage-progress" style="width: 100%"></div>
+                    </div>
+                    <p class="usage-text">Unlimited Access</p>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active">
+                        <a href="#" class="nav-link" data-page="dashboard">
+                            <span class="nav-icon">📊</span>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="leaderboard">
+                            <span class="nav-icon">🏆</span>
+                            <span class="nav-text">Leaderboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="profile">
+                            <span class="nav-icon">👤</span>
+                            <span class="nav-text">Profile</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-page="settings">
+                            <span class="nav-icon">⚙️</span>
+                            <span class="nav-text">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button id="logoutBtnSidebar" class="logout-btn" title="Logout">
+                    <span class="logout-icon">🚪</span>
+                    <span class="logout-text">Logout</span>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <button class="menu-toggle">
+                    <span>☰</span>
+                </button>
+                <h1>Dashboard</h1>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div id="dashboard-content">
+                <!-- SERVER SELECTION -->
+                <section class="panel-section">
+                    <div class="section-title">
+                        <div class="title-icon-wrapper">
+                            <span style="font-size: 20px;">📡</span>
+                        </div>
+                        <h2>SELECT SERVER</h2>
+                    </div>
+
+                    <div class="server-select-container">
+                        <select id="serverSelect" class="server-select">
+                            <option value="">Select a Server...</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- CONFIGURATION -->
+                <section class="panel-section input-section">
+                    <div class="section-title">
+                        <div class="title-icon-wrapper">
+                            <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <h2>CONFIGURATION</h2>
+                    </div>
+
+                    <div class="input-group-box">
+                        <label>TEAM CODE <span class="required">*</span></label>
+                        <input type="text" id="teamCode" placeholder="Enter team code" class="config-input" required>
+                    </div>
+
+                    <div class="input-group-box">
+                        <label>TARGET UID 1 <span class="required">*</span></label>
+                        <input type="text" id="uid1" placeholder="Enter UID (9-12 digits)" class="config-input uid-input" pattern="[0-9]{9,12}" required>
+                    </div>
+
+                    <div id="uidContainer"></div>
+
+                    <button class="add-uid-btn" id="addUidBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 5v14M5 12h14" stroke-width="2"/>
+                        </svg>
+                        ADD UID
+                    </button>
+                </section>
+
+                <!-- EMOTE SELECTION -->
+                <section class="panel-section emote-section">
+                    <div class="section-title">
+                        <div class="title-icon-wrapper">
+                            <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <h2>EMOTE SELECTION</h2>
+                    </div>
+
+                    <!-- Category Tabs -->
+                    <div class="category-tabs" id="categoryTabs">
+                        <!-- Categories loaded from Firebase -->
+                    </div>
+
+                    <!-- Emote Grid -->
+                    <div class="emote-grid-wrapper">
+                        <div class="emote-grid" id="emoteGrid">
+                            <!-- Emotes loaded dynamically -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STATUS -->
+                <section class="panel-section stats-section">
+                    <div class="section-title">
+                        <div class="title-icon-wrapper">
+                            <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <h2>STATUS</h2>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-icon">🖥️</div>
+                            <div class="stat-content">
+                                <span class="stat-label">Server:</span>
+                                <span class="stat-value" id="statServer">Not Selected</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-content">
+                                <span class="stat-label">UIDs:</span>
+                                <span class="stat-value" id="statUids">1</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">😊</div>
+                            <div class="stat-content">
+                                <span class="stat-label">Emote:</span>
+                                <span class="stat-value" id="statEmote">Not Selected</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Leaderboard Content (Hidden by default) -->
+            <div id="leaderboard-content" class="hidden">
+                <section class="panel-section">
+                    <div class="section-title">
+                        <div class="title-icon-wrapper">
+                            <span style="font-size: 20px;">🏆</span>
+                        </div>
+                        <h2>LEADERBOARD</h2>
+                    </div>
+                    
+                    <div class="leaderboard-container">
+                        <div class="leaderboard-header">
+                            <div class="leaderboard-col">Rank</div>
+                            <div class="leaderboard-col">User</div>
+                            <div class="leaderboard-col">Emotes Sent</div>
+                        </div>
+                        
+                        <div class="leaderboard-list">
+                            <!-- Leaderboard data will be populated dynamically -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Profile Content (Hidden by default) -->
+            <div id="profile-content" class="hidden">
+                <section class="panel-section">
+                    <div class="section-title">
+                        <div class="title-icon-wrapper">
+                            <span style="font-size: 20px;">👤</span>
+                        </div>
+                        <h2>USER PROFILE</h2>
+                    </div>
+                    
+                    <div class="profile-container">
+                        <div class="profile-header">
+                            <div class="profile-avatar">
+                                <div class="avatar-placeholder">👤</div>
+                            </div>
+                            <div class="profile-info">
+                                <h3 class="username">Loading...</h3>
+                                <p class="user-email">Loading...</p>
+                                <p class="user-plan-badge pro">Premium Member</p>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-stats">
+                            <div class="stat-card">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Emotes Today</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Total Emotes</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">0</div>
+                                <div class="stat-label">Days Active</div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-actions">
+                            <button class="action-btn">Edit Profile</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-overlay hidden">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+        </div>
+        <p class="loading-text">Sending...</p>
+    </div>
+
+    <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>
