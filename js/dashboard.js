@@ -1,6 +1,20 @@
+// Simple version that relies primarily on session storage data
 // Import Firebase modules
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+console.log('Firebase modules imported');
+console.log('initializeApp function:', typeof initializeApp);
+console.log('getFirestore function:', typeof getFirestore);
+
+// Add a timeout to detect if Firebase modules are taking too long to load
+setTimeout(() => {
+    if (typeof initializeApp !== 'function' || typeof getFirestore !== 'function') {
+        console.error('❌ Firebase modules not loaded properly after timeout');
+        console.log('initializeApp type:', typeof initializeApp);
+        console.log('getFirestore type:', typeof getFirestore);
+    }
+}, 5000);
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -13,14 +27,28 @@ const firebaseConfig = {
     appId: "1:268120663788:web:d27ba2e1428c1688bce7c9"
   };
 
-// Initialize Firebase
+console.log('Firebase config loaded:', firebaseConfig);
+
+// Initialize Firebase with better error handling
 let app, db;
 try {
+    console.log('Initializing Firebase with config:', firebaseConfig);
+    if (typeof initializeApp !== 'function') {
+        throw new Error('initializeApp is not a function');
+    }
     app = initializeApp(firebaseConfig);
+    console.log('✅ Firebase app initialized successfully');
+    if (typeof getFirestore !== 'function') {
+        throw new Error('getFirestore is not a function');
+    }
     db = getFirestore(app);
+    console.log('✅ Firestore initialized successfully');
     console.log('✅ Firebase initialized successfully');
 } catch (error) {
     console.error('❌ Firebase initialization error:', error);
+    console.log('Firebase config:', firebaseConfig);
+    // Set db to null so we can handle the error gracefully
+    db = null;
 }
 
 // State Variables
@@ -35,114 +63,197 @@ let currentUser = null;
 let unsubscribeUserListener = null;
 
 // Check Authentication
-if (!sessionStorage.getItem('auth')) {
+console.log('Auth check - Session storage auth:', sessionStorage.getItem('auth'));
+const rawAuthData = sessionStorage.getItem('auth');
+if (!rawAuthData) {
+    console.log('No auth found, redirecting to index.html');
     window.location.href = 'index.html';
 }
 
 // Subscription system removed - all users have access
 
 // Get current user data from sessionStorage
-const authData = JSON.parse(sessionStorage.getItem('auth'));
-const currentUserEmail = authData?.email;
-const currentUserUid = authData?.uid;
+let authData, currentUserEmail, currentUserUid;
+try {
+    console.log('Raw auth item:', rawAuthData);
+    authData = JSON.parse(rawAuthData);
+    currentUserEmail = authData?.email;
+    currentUserUid = authData?.uid;
+    console.log('Auth data parsed:', authData);
+    console.log('Current user UID:', currentUserUid);
+} catch (error) {
+    console.error('Error parsing auth data:', error);
+    console.log('Raw auth item that failed to parse:', rawAuthData);
+}
 
 // ===== INITIALIZE USER PROFILE =====
 async function initializeUserProfile() {
     try {
         console.log('🔄 Initializing user profile');
+        console.log('Database initialized:', !!db);
+        console.log('Current user UID:', currentUserUid);
         
-        if (!db) {
-            console.error('❌ Database not initialized');
+        // Check if we have auth data
+        if (!authData) {
+            console.error('❌ No auth data found');
+            showToast('Authentication error. Please log in again.', 'error');
+            sessionStorage.removeItem('auth');
+            window.location.href = 'index.html';
             return;
         }
         
-        // Get user data from sessionStorage
-        const authData = JSON.parse(sessionStorage.getItem('auth'));
-        const userUid = authData?.uid;
-        const userEmail = authData?.email;
-        const userName = authData?.name;
+        // Always initialize UI with session data first (this is the primary method now)
+        initializeUIWithSessionData();
         
-        if (!userUid) {
-            console.error('❌ User UID not found in session storage');
-            return;
+        // Try to enhance with Firebase data if available
+        if (db && currentUserUid) {
+            try {
+                // Get user data from sessionStorage
+                const userUid = authData?.uid;
+                const userEmail = authData?.email;
+                const userName = authData?.name;
+                
+                console.log('User data from session:', { userUid, userEmail, userName });
+                
+                if (userUid) {
+                    // Reference to user document in Firestore
+                    const userDocRef = doc(db, 'users', userUid);
+                    
+                    // Check if user document exists
+                    const userDoc = await getDoc(userDocRef);
+                    
+                    let userData;
+                    if (userDoc.exists()) {
+                        // User exists, get their data
+                        userData = userDoc.data();
+                        console.log('✅ Existing user profile loaded:', userData);
+                    } else {
+                        // New user, create their profile with default values
+                        userData = {
+                            uid: userUid,
+                            email: userEmail,
+                            name: userName || userEmail?.split('@')[0] || 'User',
+                            plan: 'pro', // All users are pro now
+                            emotesSentToday: 0,
+                            totalEmotes: 0,
+                            daysActive: 1,
+                            createdAt: new Date().toISOString(),
+                            lastLogin: new Date().toISOString()
+                        };
+                        
+                        // Save user data to Firestore
+                        try {
+                            await setDoc(userDocRef, userData);
+                            console.log('✅ New user profile created:', userData);
+                        } catch (error) {
+                            console.error('❌ Error creating user profile:', error);
+                            // Continue with local data if Firestore fails
+                        }
+                    }
+                    
+                    // Update last login time
+                    try {
+                        await setDoc(userDocRef, { lastLogin: new Date().toISOString() }, { merge: true });
+                    } catch (error) {
+                        console.error('❌ Error updating last login time:', error);
+                    }
+                    
+                    // Update global currentUser variable
+                    currentUser = userData;
+                    
+                    // Update UI elements with Firebase data (enhancement)
+                    document.querySelectorAll('.username').forEach(el => {
+                        el.textContent = userData.name;
+                    });
+                    
+                    document.querySelectorAll('.user-email').forEach(el => {
+                        el.textContent = userData.email;
+                    });
+                    
+                    // Update emote stats with Firebase data
+                    const emotesTodayElement = document.getElementById('emotesToday');
+                    const totalEmotesElement = document.getElementById('totalEmotes');
+                    const daysActiveElement = document.getElementById('daysActive');
+                    
+                    if (emotesTodayElement) emotesTodayElement.textContent = userData.emotesSentToday || 0;
+                    if (totalEmotesElement) totalEmotesElement.textContent = userData.totalEmotes || 0;
+                    if (daysActiveElement) daysActiveElement.textContent = userData.daysActive || 1;
+                    
+                    console.log('✅ User profile enhanced with Firebase data');
+                }
+            } catch (firebaseError) {
+                console.error('❌ Firebase enhancement error:', firebaseError);
+                // Continue with session data only
+            }
         }
         
-        // Reference to user document in Firestore
-        const userDocRef = doc(db, 'users', userUid);
-        
-        // Check if user document exists
-        const userDoc = await getDoc(userDocRef);
-        
-        let userData;
-        if (userDoc.exists()) {
-            // User exists, get their data
-            userData = userDoc.data();
-            console.log('✅ Existing user profile loaded:', userData);
-        } else {
-            // New user, create their profile with default values
-            userData = {
-                uid: userUid,
-                email: userEmail,
-                name: userName || userEmail?.split('@')[0] || 'User',
-                plan: 'pro', // All users are pro now
-                emotesSentToday: 0,
-                totalEmotes: 0,
-                daysActive: 1,
-                createdAt: new Date().toISOString(),
-                lastLogin: new Date().toISOString()
-            };
-            
-            // Save user data to Firestore
-            await setDoc(userDocRef, userData);
-            console.log('✅ New user profile created:', userData);
-        }
-        
-        // Update last login time
-        await setDoc(userDocRef, { lastLogin: new Date().toISOString() }, { merge: true });
-        
-        // Update global currentUser variable
-        currentUser = userData;
-        
-        // Update UI elements
-        document.querySelectorAll('.username').forEach(el => {
-            el.textContent = userData.name;
-        });
-        
-        document.querySelectorAll('.user-email').forEach(el => {
-            el.textContent = userData.email;
-        });
-        
-        // Update emote stats
-        const emotesTodayElement = document.getElementById('emotesToday');
-        const totalEmotesElement = document.getElementById('totalEmotes');
-        const daysActiveElement = document.getElementById('daysActive');
-        
-        if (emotesTodayElement) emotesTodayElement.textContent = userData.emotesSentToday || 0;
-        if (totalEmotesElement) totalEmotesElement.textContent = userData.totalEmotes || 0;
-        if (daysActiveElement) daysActiveElement.textContent = userData.daysActive || 1;
-        
-        // Update usage bar (always show full for pro users)
-        const usageProgress = document.querySelector('.usage-progress');
-        const usageText = document.querySelector('.usage-text');
-        if (usageProgress) usageProgress.style.width = '100%';
-        if (usageText) usageText.textContent = 'Unlimited Access';
-        
-        console.log('✅ User profile initialized successfully');
+        console.log('✅ User profile initialization completed');
         
     } catch (error) {
         console.error('❌ User profile initialization error:', error);
+        // Fallback to session data
+        initializeUIWithSessionData();
     }
+}
+
+// Fallback function to initialize UI with session data when Firebase fails
+function initializeUIWithSessionData() {
+    console.log('🔄 Initializing UI with session data (fallback)');
+    
+    if (!authData) {
+        console.error('❌ No auth data for fallback');
+        return;
+    }
+    
+    // Update UI elements with session data
+    document.querySelectorAll('.username').forEach(el => {
+        el.textContent = authData.name || authData.email?.split('@')[0] || 'User';
+    });
+    
+    document.querySelectorAll('.user-email').forEach(el => {
+        el.textContent = authData.email || 'Unknown';
+    });
+    
+    // Update emote stats with default values
+    const emotesTodayElement = document.getElementById('emotesToday');
+    const totalEmotesElement = document.getElementById('totalEmotes');
+    const daysActiveElement = document.getElementById('daysActive');
+    
+    if (emotesTodayElement) emotesTodayElement.textContent = '0';
+    if (totalEmotesElement) totalEmotesElement.textContent = '0';
+    if (daysActiveElement) daysActiveElement.textContent = '1';
+    
+    // Update usage bar (always show full for pro users)
+    const usageProgress = document.querySelector('.usage-progress');
+    const usageText = document.querySelector('.usage-text');
+    if (usageProgress) usageProgress.style.width = '100%';
+    if (usageText) usageText.textContent = 'Unlimited Access';
+    
+    console.log('✅ UI initialized with session data');
+    showToast('Welcome! Using offline mode.', 'info');
 }
 
 // ===== SETUP REAL-TIME USER PROFILE UPDATES =====
 function setupRealTimeUserProfile() {
     try {
+        console.log('Setting up real-time user profile updates');
+        console.log('Database initialized:', !!db);
+        console.log('Current user UID:', currentUserUid);
+        
+        // Check if Firebase is available
+        if (!db) {
+            console.log('❌ Firebase not available, skipping real-time updates');
+            return;
+        }
+        
         // Get the user UID from sessionStorage
         const authData = JSON.parse(sessionStorage.getItem('auth'));
         const userUid = authData?.uid;
         
-        if (!db || !userUid) {
-            console.error('❌ Database not initialized or user not authenticated');
+        console.log('Setting up real-time updates for user:', userUid);
+        
+        if (!userUid) {
+            console.error('❌ User UID not found for real-time updates');
             return;
         }
         
@@ -187,6 +298,7 @@ const logoutBtnSidebar = document.getElementById('logoutBtnSidebar');
 
 // Logout Handler
 function handleLogout() {
+    console.log('Logging out user');
     // Unsubscribe from real-time listener
     if (unsubscribeUserListener) {
         unsubscribeUserListener();
@@ -321,12 +433,13 @@ function processToastQueue() {
 // ===== INITIALIZE DASHBOARD =====
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Dashboard initializing...');
+    console.log('Session storage auth:', sessionStorage.getItem('auth'));
     
     try {
-        // Initialize user profile
+        // Initialize user profile (now prioritizes session data)
         await initializeUserProfile();
         
-        // Setup real-time updates
+        // Setup real-time updates (if Firebase is available)
         setupRealTimeUserProfile();
         
         // Initialize other dashboard components
