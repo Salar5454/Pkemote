@@ -161,22 +161,7 @@ async function initializeUserProfile() {
                     currentUser = userData;
                     
                     // Update UI elements with Firebase data (enhancement)
-                    document.querySelectorAll('.username').forEach(el => {
-                        el.textContent = userData.name;
-                    });
-                    
-                    document.querySelectorAll('.user-email').forEach(el => {
-                        el.textContent = userData.email;
-                    });
-                    
-                    // Update emote stats with Firebase data
-                    const emotesTodayElement = document.getElementById('emotesToday');
-                    const totalEmotesElement = document.getElementById('totalEmotes');
-                    const daysActiveElement = document.getElementById('daysActive');
-                    
-                    if (emotesTodayElement) emotesTodayElement.textContent = userData.emotesSentToday || 0;
-                    if (totalEmotesElement) totalEmotesElement.textContent = userData.totalEmotes || 0;
-                    if (daysActiveElement) daysActiveElement.textContent = userData.daysActive || 1;
+                    updateUIWithUserData(userData);
                     
                     console.log('✅ User profile enhanced with Firebase data');
                 }
@@ -232,6 +217,33 @@ function initializeUIWithSessionData() {
     showToast('Welcome! Using offline mode.', 'info');
 }
 
+// New function to update UI with user data without reinitializing everything
+function updateUIWithUserData(userData) {
+    // Update UI elements with Firebase data
+    document.querySelectorAll('.username').forEach(el => {
+        el.textContent = userData.name;
+    });
+    
+    document.querySelectorAll('.user-email').forEach(el => {
+        el.textContent = userData.email;
+    });
+    
+    // Update emote stats
+    const emotesTodayElement = document.getElementById('emotesToday');
+    const totalEmotesElement = document.getElementById('totalEmotes');
+    const daysActiveElement = document.getElementById('daysActive');
+    
+    if (emotesTodayElement) emotesTodayElement.textContent = userData.emotesSentToday || 0;
+    if (totalEmotesElement) totalEmotesElement.textContent = userData.totalEmotes || 0;
+    if (daysActiveElement) daysActiveElement.textContent = userData.daysActive || 1;
+    
+    // Update usage bar (always show full for pro users)
+    const usageProgress = document.querySelector('.usage-progress');
+    const usageText = document.querySelector('.usage-text');
+    if (usageProgress) usageProgress.style.width = '100%';
+    if (usageText) usageText.textContent = 'Unlimited Access';
+}
+
 // ===== SETUP REAL-TIME USER PROFILE UPDATES =====
 function setupRealTimeUserProfile() {
     try {
@@ -270,8 +282,8 @@ function setupRealTimeUserProfile() {
                 // Update global currentUser variable
                 currentUser = userData;
                 
-                // Update UI with new data
-                initializeUserProfile();
+                // Update UI with new data (without reinitializing everything)
+                updateUIWithUserData(userData);
                 
                 console.log('✅ User profile updated in real-time');
             } else {
