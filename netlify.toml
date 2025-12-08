@@ -2,6 +2,13 @@
   functions = "netlify/functions"
   publish = "."
 
+# API routes should not be redirected to index.html
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# All other routes go to index.html for SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
