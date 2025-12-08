@@ -827,6 +827,14 @@ async function sendEmote() {
         return;
     }
     
+    // Validate server URL format
+    try {
+        new URL(serverUrl);
+    } catch (e) {
+        showToast('❌ Invalid server URL format', 'error');
+        return;
+    }
+    
     if (!teamCode) {
         showToast('❌ Please enter a team code', 'error');
         return;
@@ -880,17 +888,55 @@ async function sendEmote() {
         const apiUrl = `/api/send-emote?${params.toString()}`;
         console.log('⚡ Sending emote with URL:', apiUrl);
         
-        const response = await fetch(apiUrl);
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        const finalApiUrl = `${apiUrl}&_t=${timestamp}`;
+        
+        // Test if the API endpoint is accessible
+        try {
+            const testResponse = await fetch('/api/send-emote', { method: 'HEAD', timeout: 5000 });
+            if (!testResponse.ok && testResponse.status !== 405) { // 405 is expected for HEAD request
+                console.warn('⚠️ API endpoint may not be accessible, status:', testResponse.status);
+            }
+        } catch (testError) {
+            console.error('❌ Failed to test API endpoint accessibility:', testError);
+        }
+        
+        let response;
+        try {
+            response = await fetch(finalApiUrl);
+        } catch (fetchError) {
+            console.error('❌ Fetch error:', fetchError);
+            
+            // Check if this is a CORS or network error
+            if (fetchError.name === 'TypeError' && fetchError.message.includes('fetch')) {
+                throw new Error('Network error. Please check your internet connection and try again.');
+            }
+            
+            throw fetchError;
+        }
         
         // Check if response is OK and is JSON
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error(`HTTP error! status: ${response.status}`, errorText);
+            
+            // If we get HTML, it's likely a redirect to login page
+            if (errorText.trim().startsWith('<!DOCTYPE html>') || errorText.includes('<html')) {
+                throw new Error('Authentication required. Please refresh the page and log in again.');
+            }
+            
+            throw new Error(`HTTP error! status: ${response.status}. Server returned: ${errorText.substring(0, 200)}...`);
         }
         
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
             const text = await response.text();
             console.error('Non-JSON response received:', text);
+            // If we get HTML, it's likely a redirect to login page
+            if (text.trim().startsWith('<!DOCTYPE html>') || text.includes('<html')) {
+                throw new Error('Authentication required. Please refresh the page and log in again.');
+            }
             throw new Error('Received non-JSON response from server');
         }
         
@@ -938,7 +984,21 @@ async function sendEmote() {
         }
     } catch (error) {
         console.error('❌ Error sending emote:', error);
-        showToast('❌ Network error. Please try again.', 'error');
+        
+        // Provide more specific error messages
+        let errorMessage = '❌ Failed to send emote. Please try again.';
+        
+        if (error.message.includes('Authentication required')) {
+            errorMessage = '🔒 Session expired. Please refresh the page and log in again.';
+        } else if (error.message.includes('Network error')) {
+            errorMessage = '🌐 Network error. Please check your connection and try again.';
+        } else if (error.message.includes('timeout')) {
+            errorMessage = '⏰ Request timed out. Please try again.';
+        } else if (error.message.includes('Invalid server URL')) {
+            errorMessage = '🚫 Invalid server URL. Please select a valid server.';
+        }
+        
+        showToast(errorMessage, 'error');
     } finally {
         hideLoader();
     }
