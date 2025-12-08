@@ -4,8 +4,15 @@
 exports.handler = async (event, context) => {
   const startTime = Date.now();
   
+  console.log('📥 Received request:', {
+    httpMethod: event.httpMethod,
+    queryStringParameters: event.queryStringParameters,
+    headers: event.headers
+  });
+  
   // ✅ Quick method check
   if (event.httpMethod !== 'GET') {
+    console.log('❌ Method not allowed:', event.httpMethod);
     return {
       statusCode: 405,
       headers: {
@@ -19,8 +26,17 @@ exports.handler = async (event, context) => {
   try {
     const params = event.queryStringParameters;
     
+    console.log('🔧 Processing parameters:', params);
+    
     // ✅ Fast validation with single condition
     if (!params?.server || !params?.tc || !params?.uid1 || !params?.emote_id) {
+      console.log('❌ Missing required parameters:', {
+        server: !!params?.server,
+        tc: !!params?.tc,
+        uid1: !!params?.uid1,
+        emote_id: !!params?.emote_id
+      });
+      
       return {
         statusCode: 400,
         headers: {
@@ -29,7 +45,26 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({ 
           error: 'Missing required parameters',
-          required: ['server', 'tc', 'uid1', 'emote_id']
+          required: ['server', 'tc', 'uid1', 'emote_id'],
+          provided: Object.keys(params || {})
+        })
+      };
+    }
+    
+    // ✅ Validate server URL
+    try {
+      new URL(params.server);
+    } catch (urlError) {
+      console.log('❌ Invalid server URL:', params.server);
+      return {
+        statusCode: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify({ 
+          error: 'Invalid server URL',
+          server: params.server
         })
       };
     }
