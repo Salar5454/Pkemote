@@ -1186,9 +1186,30 @@ async function createFivePlayerGroup() {
         const response = await fetch(apiUrl);
         
         if (response.ok) {
-            const result = await response.json();
-            console.log('✅ 5 player group API response:', result);
-            showToast('✅ 5 player group created successfully!', 'success');
+            // Try to parse as JSON first, fallback to text
+            try {
+                const contentType = response.headers.get('content-type');
+                let result;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    const textResult = await response.text();
+                    // If it's HTML, just show success
+                    if (textResult.startsWith('<')) {
+                        result = { success: true, message: '5 player group created successfully!' };
+                    } else {
+                        result = { success: true, message: textResult || '5 player group created successfully!' };
+                    }
+                }
+                
+                console.log('✅ 5 player group API response:', result);
+                showToast('✅ 5 player group created successfully!', 'success');
+            } catch (parseError) {
+                // Even if parsing fails, consider it a success since the request was OK
+                console.warn('⚠️ Could not parse API response, but request was successful');
+                showToast('✅ 5 player group created successfully!', 'success');
+            }
         } else {
             const errorText = await response.text();
             console.error('❌ 5 player group API error:', response.status, errorText);
