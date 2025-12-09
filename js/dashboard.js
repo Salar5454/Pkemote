@@ -286,6 +286,7 @@ const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
 const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
 const topNavbar = document.querySelector('.top-navbar');
 const mainWrapper = document.querySelector('.main-wrapper');
+const createGroupBtn = document.getElementById('createGroupBtn');
 
 // Logout Handler
 function handleLogout() {
@@ -301,6 +302,11 @@ function handleLogout() {
 
 document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
 document.getElementById('logoutBtnSidebar')?.addEventListener('click', handleLogout);
+
+// 5-Player Group Button Event Listener
+if (createGroupBtn) {
+    createGroupBtn.addEventListener('click', createFivePlayerGroup);
+}
 
 // Navigation Handler
 function switchPage(page) {
@@ -1133,13 +1139,7 @@ async function loadLeaderboard() {
     }
 }
 
-// Add this after the other DOM elements near line 289
-const createGroupBtn = document.getElementById('createGroupBtn');
 
-// Add this after the other event listeners near line 304
-if (createGroupBtn) {
-    createGroupBtn.addEventListener('click', createFivePlayerGroup);
-}
 
 // ===== CREATE 5 PLAYER GROUP FUNCTION =====
 async function createFivePlayerGroup() {
