@@ -26,6 +26,34 @@ try {
     console.error('❌ Firebase initialization error:', error);
 }
 
+// Check if Firebase is properly initialized
+function isFirebaseInitialized() {
+    return !!db;
+}
+
+// Wait for Firebase to be ready
+async function waitForFirebase() {
+    return new Promise((resolve) => {
+        if (isFirebaseInitialized()) {
+            resolve();
+            return;
+        }
+        
+        const interval = setInterval(() => {
+            if (isFirebaseInitialized()) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 100);
+        
+        // Timeout after 5 seconds
+        setTimeout(() => {
+            clearInterval(interval);
+            resolve();
+        }, 5000);
+    });
+}
+
 // Loader Functions
 function showLoader() {
     const loader = document.getElementById('adminLoader');
@@ -50,6 +78,8 @@ const loginForm = document.getElementById('adminLoginForm');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log('📥 Admin login form submitted');
+        
         const emailInput = document.getElementById('adminEmail');
         const passwordInput = document.getElementById('adminPassword');
         const errorDiv = document.getElementById('adminLoginError');
@@ -61,20 +91,46 @@ if (loginForm) {
         
         const email = emailInput.value;
         const password = passwordInput.value;
+        
+        console.log('📧 Attempting login with:', email);
 
         showLoader();
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            console.log('🔐 Attempting admin login with email:', email);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            console.log('✅ Admin login successful:', userCredential.user.email);
+            
             const loginView = document.getElementById('adminLoginView');
             const dashboard = document.getElementById('adminDashboard');
-            if (loginView) loginView.classList.add('hidden');
-            if (dashboard) dashboard.classList.remove('hidden');
+            
+            if (loginView) {
+                console.log('🙈 Hiding login view');
+                loginView.classList.add('hidden');
+            }
+            
+            if (dashboard) {
+                console.log('👀 Showing admin dashboard');
+                dashboard.classList.remove('hidden');
+            }
+            
+            console.log('🔄 Loading all data');
             await loadAllData();
+            console.log('✅ Admin panel ready');
         } catch (error) {
-            errorDiv.textContent = '❌ Invalid credentials';
+            console.error('❌ Admin login error:', error);
+            let errorMessage = 'Login failed';
+            if (error.code === 'auth/user-not-found') {
+                errorMessage = 'User not found';
+            } else if (error.code === 'auth/wrong-password') {
+                errorMessage = 'Incorrect password';
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = 'Invalid email address';
+            } else {
+                errorMessage = error.message;
+            }
+            errorDiv.textContent = `❌ ${errorMessage}`;
             errorDiv.classList.remove('hidden');
-            setTimeout(() => errorDiv.classList.add('hidden'), 3000);
-            console.error('Login error:', error);
+            setTimeout(() => errorDiv.classList.add('hidden'), 5000);
         } finally {
             hideLoader();
         }
@@ -92,27 +148,53 @@ if (logoutBtn) {
 
 // Load All Data
 async function loadAllData() {
-    await loadServers();
-    await loadCategories();
-    await loadCategoryDropdown();
-    await loadEmotes();
-    await loadLinks();
-    await loadMaintenance();
+    console.log('🔄 Loading all admin data');
+    
+    // Wait for Firebase to be ready
+    await waitForFirebase();
+    
+    if (!isFirebaseInitialized()) {
+        console.error('❌ Firebase not initialized, cannot load data');
+        return;
+    }
+    
+    // Small delay to ensure DOM is ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    try {
+        await loadServers();
+        await loadCategories();
+        await loadCategoryDropdown();
+        await loadEmotes();
+        await loadLinks();
+        await loadMaintenance();
+        await loadGroupApiSettings();
+        console.log('✅ All admin data loaded successfully');
+    } catch (error) {
+        console.error('❌ Error loading admin data:', error);
+    }
 }
 
 // ===== SERVER MANAGEMENT =====
 async function loadServers() {
+    console.log('🔄 Loading servers...');
     const serverList = document.getElementById('serverList');
-    if (!serverList) return;
+    if (!serverList) {
+        console.warn('⚠️ Server list element not found');
+        return;
+    }
     
-    serverList.innerHTML = '';
+    serverList.innerHTML = '<p class="no-data">Loading servers...</p>';
     
     try {
         const serversCol = collection(db, 'servers');
         const snapshot = await getDocs(serversCol);
         
+        console.log('📥 Servers snapshot received:', snapshot.size, 'documents');
+        
         if (snapshot.empty) {
             serverList.innerHTML = '<p class="no-data">No servers added yet</p>';
+            console.log('📭 No servers found in database');
             return;
         }
         
@@ -122,6 +204,9 @@ async function loadServers() {
         });
         
         servers.sort((a, b) => (a.order || 0) - (b.order || 0));
+        
+        // Clear the list
+        serverList.innerHTML = '';
         
         // Group servers by region with proper categorization
         const indianServers = servers.filter(s => s.region === 'indian');
@@ -173,9 +258,10 @@ async function loadServers() {
             serverList.innerHTML = '<p class="no-data">No servers added yet</p>';
         }
         
+        console.log('✅ Servers loaded successfully');
     } catch (error) {
-        console.error('Server load error:', error);
-        serverList.innerHTML = '<p class="error-text">Error loading servers</p>';
+        console.error('❌ Server load error:', error);
+        serverList.innerHTML = `<p class="error-text">Error loading servers: ${error.message}</p>`;
     }
 }
 
@@ -337,19 +423,29 @@ if (cancelServerEdit) {
 
 // ===== CATEGORY MANAGEMENT =====
 async function loadCategories() {
+    console.log('🔄 Loading categories...');
     const categoryList = document.getElementById('categoryList');
-    if (!categoryList) return;
+    if (!categoryList) {
+        console.warn('⚠️ Category list element not found');
+        return;
+    }
     
-    categoryList.innerHTML = '';
+    categoryList.innerHTML = '<p class="no-data">Loading categories...</p>';
     
     try {
         const categoriesCol = collection(db, 'categories');
         const snapshot = await getDocs(categoriesCol);
         
+        console.log('📥 Categories snapshot received:', snapshot.size, 'documents');
+        
         if (snapshot.empty) {
             categoryList.innerHTML = '<p class="no-data">No categories added yet</p>';
+            console.log('📭 No categories found in database');
             return;
         }
+        
+        // Clear the list
+        categoryList.innerHTML = '';
         
         const categories = [];
         snapshot.forEach(doc => {
@@ -358,16 +454,17 @@ async function loadCategories() {
         
         categories.sort((a, b) => (a.order || 0) - (b.order || 0));
         
+        let categoryCount = 0;
         categories.forEach(cat => {
             const item = document.createElement('div');
             item.className = 'admin-item';
             item.innerHTML = `
                 <div class="admin-item-info">
-                    <strong>${cat.icon || ''} ${cat.name}</strong>
+                    <strong>${cat.icon || ''} ${cat.name || 'Unnamed'}</strong>
                     <span style="color: var(--text-gray); font-size: 12px;">Order: ${cat.order || 0}</span>
                 </div>
                 <div class="admin-item-actions">
-                    <button class="action-icon-btn pin" data-action="editCategory" data-id="${cat.id}" data-name="${cat.name}" data-icon="${cat.icon || ''}" data-order="${cat.order || 0}">
+                    <button class="action-icon-btn pin" data-action="editCategory" data-id="${cat.id}" data-name="${cat.name || ''}" data-icon="${cat.icon || ''}" data-order="${cat.order || 0}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/>
                         </svg>
@@ -380,7 +477,10 @@ async function loadCategories() {
                 </div>
             `;
             categoryList.appendChild(item);
+            categoryCount++;
         });
+        
+        console.log(`✅ Loaded ${categoryCount} categories`);
         
         // Add event listeners
         categoryList.querySelectorAll('[data-action="editCategory"]').forEach(btn => {
@@ -396,16 +496,23 @@ async function loadCategories() {
         });
         
     } catch (error) {
-        console.error('Category load error:', error);
+        console.error('❌ Category load error:', error);
+        if (categoryList) {
+            categoryList.innerHTML = `<p class="error-text">Error loading categories: ${error.message}</p>`;
+        }
     }
 }
 
 async function loadCategoryDropdown() {
+    console.log('🔄 Loading category dropdown...');
     try {
         const categoriesCol = collection(db, 'categories');
         const snapshot = await getDocs(categoriesCol);
         const select = document.getElementById('emoteCategory');
-        if (!select) return;
+        if (!select) {
+            console.warn('⚠️ Category dropdown element not found');
+            return;
+        }
         
         select.innerHTML = '<option value="">Select Category</option>';
         
@@ -416,14 +523,18 @@ async function loadCategoryDropdown() {
         
         categories.sort((a, b) => (a.order || 0) - (b.order || 0));
         
+        let categoryCount = 0;
         categories.forEach(cat => {
             const option = document.createElement('option');
             option.value = cat.id;
-            option.textContent = `${cat.icon || ''} ${cat.name}`;
+            option.textContent = `${cat.icon || ''} ${cat.name || 'Unnamed'}`;
             select.appendChild(option);
+            categoryCount++;
         });
+        
+        console.log(`✅ Loaded ${categoryCount} categories in dropdown`);
     } catch (error) {
-        console.error('Category dropdown error:', error);
+        console.error('❌ Category dropdown error:', error);
     }
 }
 
@@ -499,49 +610,78 @@ if (cancelCategoryEdit) {
 
 // ===== EMOTE MANAGEMENT =====
 async function loadEmotes() {
+    console.log('🔄 Loading emotes...');
     const emoteList = document.getElementById('emoteList');
-    if (!emoteList) return;
+    if (!emoteList) {
+        console.warn('⚠️ Emote list element not found');
+        return;
+    }
     
-    emoteList.innerHTML = '';
+    emoteList.innerHTML = '<p class="no-data">Loading emotes...</p>';
+    
+    // Check if Firebase is initialized
+    if (!db) {
+        console.error('❌ Firestore not initialized');
+        emoteList.innerHTML = '<p class="error-text">Firestore not initialized</p>';
+        return;
+    }
     
     try {
+        console.log('🔍 Querying emotes collection...');
         const emotesCol = collection(db, 'emotes');
         const snapshot = await getDocs(emotesCol);
         
+        console.log('📥 Emotes snapshot received:', snapshot.size, 'documents');
+        
         if (snapshot.empty) {
             emoteList.innerHTML = '<p class="no-data">No emotes added yet</p>';
+            console.log('📭 No emotes found in database');
             return;
         }
         
+        // Clear the list
+        emoteList.innerHTML = '';
+        
+        let emoteCount = 0;
+        console.log('📝 Processing emote documents...');
         snapshot.forEach(doc => {
-            const emote = doc.data();
-            const item = document.createElement('div');
-            item.className = 'admin-item';
-            item.innerHTML = `
-                <div class="admin-item-info" style="display: flex; align-items: center; gap: 10px;">
-                    <img src="${emote.imageUrl}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 8px;">
-                    <div>
-                        <strong>${emote.emoteId}</strong>
-                        <span style="color: var(--text-gray); font-size: 12px; display: block;">Category: ${emote.category}</span>
+            try {
+                const emote = doc.data();
+                console.log('📄 Processing emote:', emote);
+                const item = document.createElement('div');
+                item.className = 'admin-item';
+                item.innerHTML = `
+                    <div class="admin-item-info" style="display: flex; align-items: center; gap: 10px;">
+                        <img src="${emote.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iOCIgZmlsbD0iIzU1NSIvPgo8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIzIiBmaWxsPSIjZmZmIi8+Cjwvc3ZnPgo='}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 8px;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiByeD0iOCIgZmlsbD0iIzU1NSIvPgo8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIzIiBmaWxsPSIjZmZmIi8+Cjwvc3ZnPgo='">
+                        <div>
+                            <strong>${emote.emoteId || 'Unnamed'}</strong>
+                            <span style="color: var(--text-gray); font-size: 12px; display: block;">Category: ${emote.category || 'Uncategorized'}</span>
+                        </div>
                     </div>
-                </div>
-                <div class="admin-item-actions">
-                    <button class="action-icon-btn pin" data-action="editEmote" data-id="${doc.id}" data-url="${emote.imageUrl}" data-category="${emote.category}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/>
-                        </svg>
-                    </button>
-                    <button class="action-icon-btn close" data-action="deleteEmote" data-id="${doc.id}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
-                        </svg>
-                    </button>
-                </div>
-            `;
-            emoteList.appendChild(item);
+                    <div class="admin-item-actions">
+                        <button class="action-icon-btn pin" data-action="editEmote" data-id="${doc.id}" data-url="${emote.imageUrl || ''}" data-category="${emote.category || ''}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="2"/>
+                            </svg>
+                        </button>
+                        <button class="action-icon-btn close" data-action="deleteEmote" data-id="${doc.id}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M18 6L6 18M6 6l12 12" stroke-width="2"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                emoteList.appendChild(item);
+                emoteCount++;
+            } catch (docError) {
+                console.error('❌ Error processing emote document:', doc.id, docError);
+            }
         });
         
+        console.log(`✅ Loaded ${emoteCount} emotes`);
+        
         // Add event listeners
+        console.log('🔗 Adding event listeners to emote buttons...');
         emoteList.querySelectorAll('[data-action="editEmote"]').forEach(btn => {
             btn.addEventListener('click', () => {
                 editEmote(btn.dataset.id, btn.dataset.url, btn.dataset.category);
@@ -554,8 +694,12 @@ async function loadEmotes() {
             });
         });
         
+        console.log('✅ Emote loading completed');
     } catch (error) {
-        console.error('Emote load error:', error);
+        console.error('❌ Emote load error:', error);
+        if (emoteList) {
+            emoteList.innerHTML = `<p class="error-text">Error loading emotes: ${error.message}</p>`;
+        }
     }
 }
 
@@ -574,6 +718,23 @@ if (emoteImageInput) {
     });
 }
 
+// Refresh emotes button
+const refreshEmotesBtn = document.getElementById('refreshEmotesBtn');
+if (refreshEmotesBtn) {
+    refreshEmotesBtn.addEventListener('click', async () => {
+        console.log('🔄 Refreshing emotes...');
+        showLoader();
+        try {
+            await loadEmotes();
+        } catch (error) {
+            console.error('❌ Error refreshing emotes:', error);
+            alert('Error refreshing emotes: ' + error.message);
+        } finally {
+            hideLoader();
+        }
+    });
+}
+
 const emoteForm = document.getElementById('emoteForm');
 if (emoteForm) {
     emoteForm.addEventListener('submit', async (e) => {
@@ -587,12 +748,16 @@ if (emoteForm) {
 
         showLoader();
         try {
+            console.log('💾 Saving emote:', { imageUrl, category, emoteId });
             const emoteData = { imageUrl, category, emoteId };
             
             if (editId) {
+                console.log('✏️ Updating existing emote:', editId);
                 await updateDoc(doc(db, 'emotes', editId), emoteData);
             } else {
-                await addDoc(collection(db, 'emotes'), emoteData);
+                console.log('➕ Adding new emote');
+                const docRef = await addDoc(collection(db, 'emotes'), emoteData);
+                console.log('✅ Emote added with ID:', docRef.id);
             }
             
             emoteForm.reset();
@@ -603,6 +768,7 @@ if (emoteForm) {
             await loadEmotes();
             alert('✅ Emote saved!');
         } catch (error) {
+            console.error('❌ Error saving emote:', error);
             alert('❌ Error: ' + error.message);
         } finally {
             hideLoader();
@@ -648,18 +814,23 @@ if (cancelEmoteEdit) {
 
 // ===== FOOTER LINKS =====
 async function loadLinks() {
+    console.log('🔄 Loading footer links...');
     try {
         const docRef = doc(db, 'settings', 'footerLinks');
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             const links = docSnap.data();
+            console.log('📥 Footer links data:', links);
             document.getElementById('telegramUrl').value = links.telegram || '';
             document.getElementById('githubUrl').value = links.github || '';
             document.getElementById('discordUrl').value = links.discord || '';
             document.getElementById('youtubeUrl').value = links.youtube || '';
+            console.log('✅ Footer links loaded');
+        } else {
+            console.log('📭 No footer links found in database');
         }
     } catch (error) {
-        console.log('Footer links not configured');
+        console.error('❌ Footer links load error:', error);
     }
 }
 
@@ -686,16 +857,44 @@ if (linksForm) {
 
 // ===== MAINTENANCE MODE =====
 async function loadMaintenance() {
+    console.log('🔄 Loading maintenance settings...');
     try {
         const docRef = doc(db, 'settings', 'maintenance');
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             const data = docSnap.data();
+            console.log('📥 Maintenance data:', data);
             document.getElementById('maintenanceToggle').checked = data.enabled || false;
             document.getElementById('maintenanceMessage').value = data.message || '';
+            console.log('✅ Maintenance settings loaded');
+        } else {
+            console.log('📭 No maintenance settings found in database');
         }
     } catch (error) {
-        console.log('Maintenance settings not configured');
+        console.error('❌ Maintenance settings load error:', error);
+    }
+}
+
+// ===== 5-PLAYER GROUP API SETTINGS =====
+async function loadGroupApiSettings() {
+    console.log('🔄 Loading 5-player group API settings...');
+    try {
+        const docRef = doc(db, 'settings', 'groupApi');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            console.log('📥 Group API data:', data);
+            document.getElementById('groupApiUrl').value = data.url || 'https://unafforded-veronique-cuter.ngrok-free.dev/5?uid={uid}';
+            document.getElementById('groupApiEnabled').checked = data.enabled || false;
+            console.log('✅ Group API settings loaded');
+        } else {
+            console.log('📭 No group API settings found in database');
+            // Set default values
+            document.getElementById('groupApiUrl').value = 'https://unafforded-veronique-cuter.ngrok-free.dev/5?uid={uid}';
+            document.getElementById('groupApiEnabled').checked = false;
+        }
+    } catch (error) {
+        console.error('❌ Group API settings load error:', error);
     }
 }
 
@@ -710,6 +909,31 @@ if (maintenanceForm) {
                 message: document.getElementById('maintenanceMessage').value
             });
             alert('✅ Maintenance settings saved!');
+        } catch (error) {
+            alert('❌ Error: ' + error.message);
+        } finally {
+            hideLoader();
+        }
+    });
+}
+
+// ===== 5-PLAYER GROUP API FORM =====
+const groupApiForm = document.getElementById('groupApiForm');
+if (groupApiForm) {
+    groupApiForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showLoader();
+        try {
+            const url = document.getElementById('groupApiUrl').value;
+            const enabled = document.getElementById('groupApiEnabled').checked;
+            
+            await setDoc(doc(db, 'settings', 'groupApi'), {
+                url: url,
+                enabled: enabled,
+                updatedAt: new Date()
+            });
+            
+            alert('✅ 5-Player Group API settings saved!');
         } catch (error) {
             alert('❌ Error: ' + error.message);
         } finally {
@@ -740,6 +964,25 @@ if (passwordForm) {
 }
 
 console.log('🔥 NOVRA X Admin Panel Ready!');
+
+// Check if user is already authenticated
+setTimeout(async () => {
+    if (auth && auth.currentUser) {
+        console.log('👤 User already authenticated, loading data');
+        const loginView = document.getElementById('adminLoginView');
+        const dashboard = document.getElementById('adminDashboard');
+        
+        if (loginView) {
+            loginView.classList.add('hidden');
+        }
+        
+        if (dashboard) {
+            dashboard.classList.remove('hidden');
+        }
+        
+        await loadAllData();
+    }
+}, 500);
 
 // ===== USER MANAGEMENT =====
 let allUsers = [];
@@ -1055,3 +1298,134 @@ dashboard?.addEventListener('DOMSubtreeModified', () => {
         loadUsers();
     }
 });
+
+// ===== ADMIN SIDEBAR FUNCTIONALITY =====
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Admin DOM loaded');
+    
+    // Wait a bit more to ensure all elements are rendered
+    setTimeout(() => {
+        initializeAdminPanel();
+    }, 100);
+});
+
+function initializeAdminPanel() {
+    console.log('🔧 Initializing admin panel');
+    
+    // Section switching
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.admin-section');
+    
+    console.log('🔍 Admin nav links found:', navLinks.length);
+    console.log('🔍 Admin sections found:', sections.length);
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            console.log('_CLICKED nav link:', link.getAttribute('data-section'));
+            
+            // Remove active class from all links and sections
+            navLinks.forEach(l => l.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+            
+            // Add active class to clicked link
+            link.classList.add('active');
+            
+            // Show corresponding section
+            const sectionId = link.getAttribute('data-section') + 'Section';
+            const section = document.getElementById(sectionId);
+            
+            console.log('_SWITCHING to section:', sectionId, section);
+            
+            if (section) {
+                section.classList.add('active');
+            } else {
+                console.error('❌ Section not found:', sectionId);
+            }
+            
+            // Close sidebar on mobile
+            const sidebar = document.querySelector('.modern-sidebar');
+            if (sidebar && window.innerWidth <= 768) {
+                sidebar.classList.remove('visible');
+            }
+        });
+    });
+    
+    // Sidebar toggle buttons
+    const sidebarToggle = document.getElementById('adminSidebarToggle');
+    const sidebarClose = document.getElementById('adminSidebarClose');
+    const sidebarBackdrop = document.getElementById('adminSidebarBackdrop');
+    const sidebar = document.querySelector('.modern-sidebar');
+    
+    console.log('🔍 Sidebar elements:', { sidebarToggle, sidebarClose, sidebarBackdrop, sidebar });
+    
+    function toggleSidebar() {
+        console.log('🔄 Toggling sidebar');
+        if (sidebar) {
+            sidebar.classList.toggle('visible');
+            if (sidebarBackdrop) {
+                sidebarBackdrop.classList.toggle('visible');
+            }
+            console.log('Sidebar visible:', sidebar.classList.contains('visible'));
+        }
+    }
+    
+    function closeSidebar() {
+        console.log('🚫 Closing sidebar');
+        if (sidebar) {
+            sidebar.classList.remove('visible');
+            if (sidebarBackdrop) {
+                sidebarBackdrop.classList.remove('visible');
+            }
+        }
+    }
+    
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', toggleSidebar);
+    }
+    
+    if (sidebarClose) {
+        sidebarClose.addEventListener('click', closeSidebar);
+    }
+    
+    if (sidebarBackdrop) {
+        sidebarBackdrop.addEventListener('click', closeSidebar);
+    }
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+        if (sidebar && window.innerWidth <= 768) {
+            if (!sidebar.contains(e.target) && 
+                !e.target.closest('#adminSidebarToggle') && 
+                sidebar.classList.contains('visible')) {
+                closeSidebar();
+            }
+        }
+    });
+    
+    // Refresh button
+    const refreshBtn = document.getElementById('adminRefreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', async () => {
+            console.log('🔄 Refresh button clicked');
+            showLoader();
+            try {
+                await loadAllData();
+                // Also refresh users if on user management section
+                const activeSection = document.querySelector('.admin-section.active');
+                console.log('Current active section:', activeSection?.id);
+                if (activeSection && activeSection.id === 'usersSection') {
+                    console.log('🔄 Refreshing users');
+                    await loadUsers();
+                }
+            } catch (error) {
+                console.error('❌ Refresh error:', error);
+                // Show error to user
+                alert('❌ Error refreshing data: ' + error.message);
+            } finally {
+                hideLoader();
+            }
+        });
+    }
+}
