@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+            --border: #e2e8f0;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .modern-admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 28px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logout-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Modern Tabs */
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .tab:hover {
+            color: var(--dark);
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        /* Modern Cards */
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .section-header {
+            background: linear-gradient(90deg, #f1f5f9, #e2e8f0);
+            padding: 25px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-body {
+            padding: 25px;
+        }
+        
+        /* Modern Table */
+        .modern-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .modern-table th,
+        .modern-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .modern-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .modern-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .modern-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        /* Modern Buttons */
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--dark);
+        }
+        
+        .btn-outline:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+        
+        /* Modern Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+        
+        /* API Status Badge */
+        .api-status {
+            display: inline-flex;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .api-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .api-inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Hidden Utility */
+        .hidden {
+            display: none;
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .stat-icon.users { background: #dbeafe; color: #3b82f6; }
+        .stat-icon.servers { background: #dcfce7; color: #10b981; }
+        .stat-icon.emotes { background: #fef3c7; color: #f59e0b; }
+        .stat-icon.api { background: #ede9fe; color: #8b5cf6; }
+        
+        .stat-content h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-content p {
+            color: var(--gray);
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .stat-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .logout-btn {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modern-admin-container">
+        <header>
+            <h1><i class="fas fa-crown"></i> Modern Admin Dashboard</h1>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </header>
+        
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon users">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalUsers">0</h3>
+                    <p>Total Users</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon servers">
+                    <i class="fas fa-server"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalServers">0</h3>
+                    <p>Servers</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon emotes">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalEmotes">0</h3>
+                    <p>Emotes</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon api">
+                    <i class="fas fa-plug"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="apiStatusValue">Inactive</h3>
+                    <p>API Status</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="users">
+                <i class="fas fa-users"></i> Users
+            </div>
+            <div class="tab" data-tab="apis">
+                <i class="fas fa-plug"></i> APIs
+            </div>
+            <div class="tab" data-tab="servers">
+                <i class="fas fa-server"></i> Servers
+            </div>
+            <div class="tab" data-tab="emotes">
+                <i class="fas fa-smile"></i> Emotes
+            </div>
+        </div>
+        
+        <!-- Users Tab -->
+        <div class="tab-content active" id="usersTab">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-users"></i> User Management</h2>
+                </div>
+                <div class="section-body">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Plan</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center;">Loading users...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- APIs Tab -->
+        <div class="tab-content" id="apisTab">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-plug"></i> API Management</h2>
+                </div>
+                <div class="section-body">
+                    <div class="form-group">
+                        <label for="apiUrl"><i class="fas fa-link"></i> 5-Player Group API URL</label>
+                        <input type="url" id="apiUrl" class="form-control" placeholder="https://example.com/5?uid={uid}">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="apiStatus"> Enable API
+                        </label>
+                    </div>
+                    <button id="saveApiBtn" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save API Settings
+                    </button>
+                    
+                    <div style="margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 12px;">
+                        <h3><i class="fas fa-info-circle"></i> Current API Status</h3>
+                        <div id="apiStatusDisplay" style="margin-top: 15px;">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Servers Tab -->
+        <div class="tab-content" id="serversTab">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-server"></i> Server Management</h2>
+                </div>
+                <div class="section-body">
+                    <div class="form-group">
+                        <label for="serverName"><i class="fas fa-tag"></i> Server Name</label>
+                        <input type="text" id="serverName" class="form-control" placeholder="e.g., India Server 1">
+                    </div>
+                    <div class="form-group">
+                        <label for="serverUrl"><i class="fas fa-link"></i> Server URL</label>
+                        <input type="url" id="serverUrl" class="form-control" placeholder="https://example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="serverRegion"><i class="fas fa-globe"></i> Region</label>
+                        <select id="serverRegion" class="form-control">
+                            <option value="indian">🇮🇳 Indian</option>
+                            <option value="bangladesh">🇧🇩 Bangladesh</option>
+                            <option value="other">🌍 Other</option>
+                        </select>
+                    </div>
+                    <button id="addServerBtn" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Add Server
+                    </button>
+                    
+                    <div style="margin-top: 30px;">
+                        <h3><i class="fas fa-list"></i> Existing Servers</h3>
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>URL</th>
+                                    <th>Region</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="serversTableBody">
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">Loading servers...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emotes Tab -->
+        <div class="tab-content" id="emotesTab">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="fas fa-smile"></i> Emote Management</h2>
+                </div>
+                <div class="section-body">
+                    <div class="form-group">
+                        <label for="emoteUrl"><i class="fas fa-image"></i> Emote Image URL</label>
+                        <input type="url" id="emoteUrl" class="form-control" placeholder="https://example.com/emote.png">
+                    </div>
+                    <div class="form-group">
+                        <label for="emoteCategory"><i class="fas fa-folder"></i> Category</label>
+                        <select id="emoteCategory" class="form-control">
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                    <button id="addEmoteBtn" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Add Emote
+                    </button>
+                    
+                    <div style="margin-top: 30px;">
+                        <h3><i class="fas fa-list"></i> Existing Emotes</h3>
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Preview</th>
+                                    <th>Category</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="emotesTableBody">
+                                <tr>
+                                    <td colspan="3" style="text-align: center;">Loading emotes...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, addDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9unPaElUZd6OcuHwtgqB7H6FoKYN0iGc",
+            authDomain: "pk-emote.firebaseapp.com",
+            databaseURL: "https://pk-emote-default-rtdb.firebaseio.com",
+            projectId: "pk-emote",
+            storageBucket: "pk-emote.firebasestorage.app",
+            messagingSenderId: "268120663788",
+            appId: "1:268120663788:web:d27ba2e1428c1688bce7c9"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // DOM Elements
+        const logoutBtn = document.getElementById('logoutBtn');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // Tab Switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}Tab`).classList.add('active');
+                
+                // Load data for the active tab
+                switch(tabId) {
+                    case 'users':
+                        loadUsers();
+                        break;
+                    case 'apis':
+                        loadApiSettings();
+                        break;
+                    case 'servers':
+                        loadServers();
+                        break;
+                    case 'emotes':
+                        loadEmotes();
+                        loadCategories();
+                        break;
+                }
+            });
+        });
+        
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Error logging out: ' + error.message);
+            }
+        });
+        
+        // Auth State Check
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                // Load initial data
+                loadDashboardStats();
+                loadUsers();
+            }
+        });
+        
+        // Load Dashboard Stats
+        async function loadDashboardStats() {
+            try {
+                // Load users count
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                document.getElementById('totalUsers').textContent = usersSnapshot.size;
+                
+                // Load servers count
+                const serversSnapshot = await getDocs(collection(db, 'servers'));
+                document.getElementById('totalServers').textContent = serversSnapshot.size;
+                
+                // Load emotes count
+                const emotesSnapshot = await getDocs(collection(db, 'emotes'));
+                document.getElementById('totalEmotes').textContent = emotesSnapshot.size;
+                
+                // Load API status
+                const apiDoc = await getDoc(doc(db, 'settings', 'groupApi'));
+                if (apiDoc.exists() && apiDoc.data().enabled) {
+                    document.getElementById('apiStatusValue').textContent = 'Active';
+                    document.getElementById('apiStatusValue').style.color = '#10b981';
+                } else {
+                    document.getElementById('apiStatusValue').textContent = 'Inactive';
+                    document.getElementById('apiStatusValue').style.color = '#ef4444';
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+        
+        // Load Users
+        async function loadUsers() {
+            try {
+                const usersCol = collection(db, 'users');
+                const snapshot = await getDocs(usersCol);
+                
+                const tableBody = document.getElementById('usersTableBody');
+                tableBody.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No users found</td></tr>';
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${doc.id.substring(0, 8)}...</td>
+                        <td>${user.name || 'N/A'}</td>
+                        <td>${user.email || 'N/A'}</td>
+                        <td><span class="badge">${user.plan || 'free'}</span></td>
+                        <td>${user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-danger btn-sm" onclick="deleteUser('${doc.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Update dashboard stats
+                loadDashboardStats();
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error loading users</td></tr>';
+            }
+        }
+        
+        // Delete User
+        window.deleteUser = async function(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                try {
+                    await deleteDoc(doc(db, 'users', userId));
+                    loadUsers();
+                    alert('User deleted successfully');
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    alert('Error deleting user: ' + error.message);
+                }
+            }
+        };
+        
+        // Load API Settings
+        async function loadApiSettings() {
+            try {
+                const docRef = doc(db, 'settings', 'groupApi');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('apiUrl').value = data.url || '';
+                    document.getElementById('apiStatus').checked = data.enabled || false;
+                    
+                    document.getElementById('apiStatusDisplay').innerHTML = `
+                        <p><strong>URL:</strong> ${data.url || 'Not set'}</p>
+                        <p><strong>Status:</strong> <span class="api-status ${data.enabled ? 'api-active' : 'api-inactive'}">
+                            ${data.enabled ? 'ACTIVE' : 'INACTIVE'}
+                        </span></p>
+                        <p><strong>Last Updated:</strong> ${data.updatedAt ? new Date(data.updatedAt.toDate()).toLocaleString() : 'N/A'}</p>
+                    `;
+                } else {
+                    document.getElementById('apiStatusDisplay').innerHTML = '<p>No API settings found</p>';
+                }
+            } catch (error) {
+                console.error('Error loading API settings:', error);
+                document.getElementById('apiStatusDisplay').innerHTML = '<p style="color: red;">Error loading API settings</p>';
+            }
+        }
+        
+        // Save API Settings
+        document.getElementById('saveApiBtn').addEventListener('click', async () => {
+            try {
+                const url = document.getElementById('apiUrl').value;
+                const enabled = document.getElementById('apiStatus').checked;
+                
+                await setDoc(doc(db, 'settings', 'groupApi'), {
+                    url: url,
+                    enabled: enabled,
+                    updatedAt: new Date()
+                });
+                
+                alert('API settings saved successfully');
+                loadApiSettings();
+                loadDashboardStats(); // Update dashboard stats
+            } catch (error) {
+                console.error('Error saving API settings:', error);
+                alert('Error saving API settings: ' + error.message);
+            }
+        });
+        
+        // Load Servers
+        async function loadServers() {
+            try {
+                const serversCol = collection(db, 'servers');
+                const snapshot = await getDocs(serversCol);
+                
+                const tableBody = document.getElementById('serversTableBody');
+                tableBody.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No servers found</td></tr>';
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const server = doc.data();
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${server.name || 'Unnamed'}</td>
+                        <td>${server.baseUrl || 'N/A'}</td>
+                        <td>${server.region || 'N/A'}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-danger btn-sm" onclick="deleteServer('${doc.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Update dashboard stats
+                loadDashboardStats();
+            } catch (error) {
+                console.error('Error loading servers:', error);
+                document.getElementById('serversTableBody').innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Error loading servers</td></tr>';
+            }
+        }
+        
+        // Add Server
+        document.getElementById('addServerBtn').addEventListener('click', async () => {
+            try {
+                const name = document.getElementById('serverName').value;
+                const url = document.getElementById('serverUrl').value;
+                const region = document.getElementById('serverRegion').value;
+                
+                if (!name || !url) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                await addDoc(collection(db, 'servers'), {
+                    name: name,
+                    baseUrl: url,
+                    region: region,
+                    order: Date.now()
+                });
+                
+                // Reset form
+                document.getElementById('serverName').value = '';
+                document.getElementById('serverUrl').value = '';
+                
+                alert('Server added successfully');
+                loadServers();
+            } catch (error) {
+                console.error('Error adding server:', error);
+                alert('Error adding server: ' + error.message);
+            }
+        });
+        
+        // Delete Server
+        window.deleteServer = async function(serverId) {
+            if (confirm('Are you sure you want to delete this server?')) {
+                try {
+                    await deleteDoc(doc(db, 'servers', serverId));
+                    loadServers();
+                    alert('Server deleted successfully');
+                } catch (error) {
+                    console.error('Error deleting server:', error);
+                    alert('Error deleting server: ' + error.message);
+                }
+            }
+        };
+        
+        // Load Emotes
+        async function loadEmotes() {
+            try {
+                const emotesCol = collection(db, 'emotes');
+                const snapshot = await getDocs(emotesCol);
+                
+                const tableBody = document.getElementById('emotesTableBody');
+                tableBody.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">No emotes found</td></tr>';
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const emote = doc.data();
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>
+                            <img src="${emote.imageUrl}" alt="Emote" style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px;">
+                        </td>
+                        <td>${emote.category || 'Uncategorized'}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-danger btn-sm" onclick="deleteEmote('${doc.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Update dashboard stats
+                loadDashboardStats();
+            } catch (error) {
+                console.error('Error loading emotes:', error);
+                document.getElementById('emotesTableBody').innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Error loading emotes</td></tr>';
+            }
+        }
+        
+        // Load Categories for Emote Form
+        async function loadCategories() {
+            try {
+                const categoriesCol = collection(db, 'categories');
+                const snapshot = await getDocs(categoriesCol);
+                
+                const select = document.getElementById('emoteCategory');
+                select.innerHTML = '<option value="">Select Category</option>';
+                
+                snapshot.forEach(doc => {
+                    const category = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = `${category.icon || ''} ${category.name || 'Unnamed'}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+        
+        // Add Emote
+        document.getElementById('addEmoteBtn').addEventListener('click', async () => {
+            try {
+                const url = document.getElementById('emoteUrl').value;
+                const category = document.getElementById('emoteCategory').value;
+                
+                if (!url || !category) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                const filename = url.split('/').pop();
+                const emoteId = filename.split('.')[0];
+                
+                await addDoc(collection(db, 'emotes'), {
+                    imageUrl: url,
+                    category: category,
+                    emoteId: emoteId
+                });
+                
+                // Reset form
+                document.getElementById('emoteUrl').value = '';
+                document.getElementById('emoteCategory').value = '';
+                
+                alert('Emote added successfully');
+                loadEmotes();
+            } catch (error) {
+                console.error('Error adding emote:', error);
+                alert('Error adding emote: ' + error.message);
+            }
+        });
+        
+        // Delete Emote
+        window.deleteEmote = async function(emoteId) {
+            if (confirm('Are you sure you want to delete this emote?')) {
+                try {
+                    await deleteDoc(doc(db, 'emotes', emoteId));
+                    loadEmotes();
+                    alert('Emote deleted successfully');
+                } catch (error) {
+                    console.error('Error deleting emote:', error);
+                    alert('Error deleting emote: ' + error.message);
+                }
+            }
+        };
+        
+        // Add some helper functions for styling
+        window.addEventListener('DOMContentLoaded', () => {
+            // Add badge styling
+            const style = document.createElement('style');
+            style.textContent = `
+                .badge {
+                    display: inline-block;
+                    padding: 4px 10px;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                }
+                
+                .badge.free {
+                    background: #fee2e2;
+                    color: #991b1b;
+                }
+                
+                .badge.weekly {
+                    background: #dbeafe;
+                    color: #1e40af;
+                }
+                
+                .badge.monthly {
+                    background: #dcfce7;
+                    color: #166534;
+                }
+                
+                .badge.lifetime {
+                    background: #f0f9ff;
+                    color: #0369a1;
+                }
+                
+                .btn-sm {
+                    padding: 6px 10px;
+                    font-size: 12px;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
