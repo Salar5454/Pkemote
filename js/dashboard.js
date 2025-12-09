@@ -513,6 +513,9 @@ function initializeDashboardComponents() {
     
     // Initialize stats
     initializeStats();
+    
+    // Load group API settings
+    loadGroupApiSettings();
 }
 
 // Implement the actual Firebase functions instead of placeholders
@@ -1004,6 +1007,50 @@ async function sendEmote() {
     }
 }
 
+// Load group API settings
+async function loadGroupApiSettings() {
+    console.log('🔄 Loading group API settings');
+    
+    if (!db) {
+        console.log('❌ Firebase not available for group API settings');
+        return;
+    }
+    
+    try {
+        const docRef = doc(db, 'settings', 'groupApi');
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            console.log('📥 Group API settings:', data);
+            
+            // Show/hide the 5-player group section based on settings
+            const groupSection = document.querySelector('#dashboard-content section:nth-last-child(1)');
+            if (groupSection && groupSection.textContent.includes('CREATE 5 PLAYER GROUP')) {
+                if (data.enabled) {
+                    groupSection.style.display = 'block';
+                } else {
+                    groupSection.style.display = 'none';
+                }
+            }
+        } else {
+            console.log('📭 No group API settings found');
+            // Hide the section by default if no settings exist
+            const groupSection = document.querySelector('#dashboard-content section:nth-last-child(1)');
+            if (groupSection && groupSection.textContent.includes('CREATE 5 PLAYER GROUP')) {
+                groupSection.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error loading group API settings:', error);
+        // Hide the section if there's an error
+        const groupSection = document.querySelector('#dashboard-content section:nth-last-child(1)');
+        if (groupSection && groupSection.textContent.includes('CREATE 5 PLAYER GROUP')) {
+            groupSection.style.display = 'none';
+        }
+    }
+}
+
 // Implement the leaderboard loading function
 async function loadLeaderboard() {
     console.log('🔄 Loading leaderboard...');
@@ -1083,5 +1130,74 @@ async function loadLeaderboard() {
         if (leaderboardList) {
             leaderboardList.innerHTML = '<p class="error-leaderboard">Error loading leaderboard. Please try again.</p>';
         }
+    }
+}
+
+// Add this after the other DOM elements near line 289
+const createGroupBtn = document.getElementById('createGroupBtn');
+
+// Add this after the other event listeners near line 304
+if (createGroupBtn) {
+    createGroupBtn.addEventListener('click', createFivePlayerGroup);
+}
+
+// ===== CREATE 5 PLAYER GROUP FUNCTION =====
+async function createFivePlayerGroup() {
+    console.log('🔄 Creating 5 player group');
+    
+    const groupUidInput = document.getElementById('groupUid');
+    if (!groupUidInput) {
+        showToast('❌ Group UID input not found', 'error');
+        return;
+    }
+    
+    const uid = groupUidInput.value.trim();
+    
+    // Validate UID format (9-12 digits)
+    if (!/^\d{9,12}$/.test(uid)) {
+        showToast('❌ Invalid UID format. Must be 9-12 digits.', 'error');
+        return;
+    }
+    
+    showLoader();
+    
+    try {
+        // Get the API URL from Firebase settings
+        let apiUrl = `https://unafforded-veronique-cuter.ngrok-free.dev/5?uid=${uid}`;
+        
+        if (db) {
+            try {
+                const docRef = doc(db, 'settings', 'groupApi');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.url) {
+                        apiUrl = data.url.replace('{uid}', uid);
+                    }
+                }
+            } catch (settingsError) {
+                console.error('❌ Error getting group API settings:', settingsError);
+            }
+        }
+        
+        console.log('⚡ Calling 5 player group API:', apiUrl);
+        
+        const response = await fetch(apiUrl);
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ 5 player group API response:', result);
+            showToast('✅ 5 player group created successfully!', 'success');
+        } else {
+            const errorText = await response.text();
+            console.error('❌ 5 player group API error:', response.status, errorText);
+            showToast(`❌ Failed to create group: ${response.status}`, 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error creating 5 player group:', error);
+        showToast(`❌ Error creating group: ${error.message}`, 'error');
+    } finally {
+        hideLoader();
     }
 }
