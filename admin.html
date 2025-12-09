@@ -9,244 +9,463 @@
 </head>
 <body class="dashboard-body">
     
-    <!-- Admin Login View -->
+    <!-- Modern Admin Login View -->
     <div id="adminLoginView" class="login-body">
+        <div class="particles-container">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+        
         <div class="login-container">
             <div class="login-box">
                 <div class="brand-section">
-                    <div class="lightning-icon">🔐</div>
+                    <div class="lightning-icon-wrapper">
+                        <div class="lightning-icon">🔐</div>
+                    </div>
                     <h1 class="brand-name">ADMIN PANEL</h1>
                     <p class="brand-tagline">PK.TOOLS Control Center</p>
+                    <p class="brand-subtitle">Secure administration dashboard</p>
                 </div>
 
                 <form id="adminLoginForm" class="login-form">
-                    <div class="input-container">
-                        <input type="email" id="adminEmail" value="sabujhawlader31@gmail.com" placeholder="Admin Email" required class="login-input" autocomplete="email">
+                    <div class="input-group-box">
+                        <label for="adminEmail">Admin Email</label>
+                        <input type="email" id="adminEmail" value="sabujhawlader31@gmail.com" placeholder="Enter your admin email" required class="config-input" autocomplete="email">
                     </div>
-                    <div class="input-container">
-                        <input type="password" id="adminPassword" placeholder="Admin Password" required class="login-input" autocomplete="current-password">
+                    <div class="input-group-box">
+                        <label for="adminPassword">Admin Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter your password" required class="config-input" autocomplete="current-password">
                     </div>
-                    <button type="submit" class="login-btn">
-                        <span>Access Admin Panel</span>
+                    <button type="submit" class="action-btn">
+                        <span>🔐 Access Admin Panel</span>
                     </button>
                     <div id="adminLoginError" class="error-message hidden"></div>
                 </form>
+                
+                <div class="login-footer">
+                    <p>🔒 Secure Admin Access • PK.TOOLS © 2025</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Admin Dashboard -->
-    <div id="adminDashboard" class="dashboard-container hidden">
-        <header class="dashboard-header">
-            <div class="header-brand">
-                <div class="lightning-icon" style="font-size: 28px;">⚡</div>
-                <h1>ADMIN PANEL</h1>
+    <!-- Modern Admin Dashboard with Sidebar -->
+    <div id="adminDashboard" class="admin-dashboard-container hidden">
+        <!-- Mobile Sidebar Backdrop -->
+        <div class="sidebar-backdrop" id="adminSidebarBackdrop"></div>
+        
+        <!-- Modern Sidebar -->
+        <aside class="modern-sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">⚡</div>
+                    <h2>ADMIN PANEL</h2>
+                </div>
+                <button class="sidebar-close-btn" id="adminSidebarClose">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="20" height="20">
+                        <path d="M18 6L6 18M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
             </div>
-            <button id="adminLogout" class="icon-button">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-width="2"/>
-                </svg>
-            </button>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="servers">
+                            <span class="nav-icon">🖥️</span>
+                            <span>Server Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="emotes">
+                            <span class="nav-icon">😊</span>
+                            <span>Emote Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="categories">
+                            <span class="nav-icon">📂</span>
+                            <span>Category Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="footer-links">
+                            <span class="nav-icon">🔗</span>
+                            <span>Footer Links</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="maintenance">
+                            <span class="nav-icon">🛠️</span>
+                            <span>Maintenance Mode</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="password">
+                            <span class="nav-icon">🔑</span>
+                            <span>Login Password</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="users">
+                            <span class="nav-icon">👥</span>
+                            <span>User Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="group-api">
+                            <span class="nav-icon">🔢</span>
+                            <span>5-Player Group API</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="adminLogout" class="logout-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16">
+                        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-width="2"/>
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Top Navbar -->
+        <header class="top-navbar">
+            <div class="navbar-container">
+                <button class="sidebar-toggle-btn" id="adminSidebarToggle">
+                    <div class="hamburger-line"></div>
+                    <div class="hamburger-line"></div>
+                    <div class="hamburger-line"></div>
+                </button>
+                <h1 class="page-title">Admin Dashboard</h1>
+                <div class="navbar-actions">
+                    <button id="adminRefreshBtn" class="refresh-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16">
+                            <path d="M23 4v6h-6M1 20v-6h6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </header>
 
-        <!-- Server Management -->
-        <section class="panel-section">
-            <div class="section-title">
-                <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2" stroke-width="2"/>
-                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2" stroke-width="2"/>
-                </svg>
-                <h2>SERVER MANAGEMENT</h2>
-            </div>
-
-            <form id="serverForm" class="admin-form">
-                <input type="hidden" id="editServerId">
-                <div class="form-grid">
-                    <input type="text" id="serverName" placeholder="Server Name (e.g., India Server 1)" required class="config-input">
-                    <input type="url" id="serverUrl" placeholder="https://example.com" required class="config-input">
-                </div>
-                <div class="form-grid">
-                    <select id="serverRegion" required class="config-input">
-                        <option value="">Select Region</option>
-                        <option value="indian">🇮🇳 Indian Servers</option>
-                        <option value="bangladesh">🇧🇩 Bangladesh Servers</option>
-                        <option value="other">🌍 Other Servers</option>
-                    </select>
-                    <input type="number" id="serverOrder" placeholder="Order (1, 2, 3...)" class="config-input" min="1">
-                </div>
-                <button type="submit" class="action-btn-large">
-                    <span id="serverBtnText">ADD SERVER</span>
-                </button>
-                <button type="button" id="cancelServerEdit" class="squad-btn leave hidden">CANCEL</button>
-            </form>
-
-            <div id="serverList" class="admin-list"></div>
-        </section>
-
-        <!-- Emote Management -->
-        <section class="panel-section">
-            <div class="section-title">
-                <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                    <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" stroke-width="2"/>
-                </svg>
-                <h2>EMOTE MANAGEMENT</h2>
-            </div>
-
-            <form id="emoteForm" class="admin-form">
-                <input type="hidden" id="editEmoteId">
-                <div class="form-grid">
-                    <input type="url" id="emoteImageUrl" placeholder="Image URL" required class="config-input">
-                    <select id="emoteCategory" required class="config-input">
-                        <option value="">Select Category</option>
-                    </select>
-                </div>
-                <div id="emotePreview" class="emote-preview-container"></div>
-                <button type="submit" class="action-btn-large">
-                    <span id="emoteBtnText">ADD EMOTE</span>
-                </button>
-                <button type="button" id="cancelEmoteEdit" class="squad-btn leave hidden">CANCEL</button>
-            </form>
-
-            <div id="emoteList" class="admin-list"></div>
-        </section>
-
-        <!-- Category Management -->
-        <section class="panel-section">
-            <div class="section-title">
-                <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <h2>CATEGORY MANAGEMENT</h2>
-            </div>
-
-            <form id="categoryForm" class="admin-form">
-                <input type="hidden" id="editCategoryId">
-                <div class="form-grid">
-                    <input type="text" id="categoryName" placeholder="Category Name (e.g., HOT)" required class="config-input">
-                    <input type="text" id="categoryIcon" placeholder="Icon (e.g., 🔥)" class="config-input">
-                </div>
-                <input type="number" id="categoryOrder" placeholder="Order (1, 2, 3...)" class="config-input" min="1">
-                <button type="submit" class="action-btn-large">
-                    <span id="categoryBtnText">ADD CATEGORY</span>
-                </button>
-                <button type="button" id="cancelCategoryEdit" class="squad-btn leave hidden">CANCEL</button>
-            </form>
-
-            <div id="categoryList" class="admin-list"></div>
-        </section>
-
-        <!-- Footer Links -->
-        <section class="panel-section">
-            <div class="section-title">
-                <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke-width="2"/>
-                </svg>
-                <h2>FOOTER LINKS</h2>
-            </div>
-
-            <form id="linksForm" class="admin-form">
-                <input type="url" id="telegramUrl" placeholder="Telegram URL" required class="config-input">
-                <input type="url" id="githubUrl" placeholder="GitHub URL" required class="config-input">
-                <input type="url" id="discordUrl" placeholder="Discord URL" required class="config-input">
-                <input type="url" id="youtubeUrl" placeholder="YouTube URL" required class="config-input">
-                <button type="submit" class="action-btn-large">
-                    <span>UPDATE LINKS</span>
-                </button>
-            </form>
-        </section>
-
-        <!-- Maintenance Mode -->
-        <section class="panel-section">
-            <div class="section-title">
-                <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" stroke-width="2"/>
-                </svg>
-                <h2>MAINTENANCE MODE</h2>
-            </div>
-
-            <form id="maintenanceForm" class="admin-form">
-                <div class="toggle-container">
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="maintenanceToggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-label">Enable Maintenance Mode</span>
-                </div>
-                <textarea id="maintenanceMessage" placeholder="Maintenance message for users..." rows="3" class="config-input"></textarea>
-                <button type="submit" class="action-btn-large">
-                    <span>SAVE SETTINGS</span>
-                </button>
-            </form>
-        </section>
-
-        <!-- Password Manager -->
-        <section class="panel-section">
-            <div class="section-title">
-                <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="2"/>
-                    <path d="M7 11V7a5 5 0 0110 0v4" stroke-width="2"/>
-                </svg>
-                <h2>LOGIN PASSWORD</h2>
-            </div>
-
-            <form id="passwordForm" class="admin-form">
-                <input type="password" id="newPassword" placeholder="New Login Password" required class="config-input">
-                <button type="submit" class="action-btn-large">
-                    <span>UPDATE PASSWORD</span>
-                </button>
-            </form>
-        </section>
-
-        <!-- User Management -->
-        <section class="panel-section">
-            <div class="section-title">
-                <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke-width="2"/>
-                    <circle cx="8.5" cy="7" r="4" stroke-width="2"/>
-                    <path d="M20 8v6M23 11h-6" stroke-width="2"/>
-                </svg>
-                <h2>USER MANAGEMENT</h2>
-            </div>
-
-            <div class="admin-controls">
-                <button id="refreshUsersBtn" class="action-btn" style="margin-bottom: 15px;">
-                    <span>REFRESH USERS</span>
-                </button>
-                
-                <div class="form-grid">
-                    <input type="text" id="searchUser" placeholder="Search by email or name" class="config-input">
-                    <select id="filterPlan" class="config-input">
-                        <option value="">All Plans</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="lifetime">Lifetime</option>
-                        <option value="free">Free</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="userStats" class="user-stats-container" style="margin: 20px 0; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px;">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalUsers">0</div>
-                        <div class="stat-label">Total Users</div>
+        <!-- Main Content -->
+        <div class="main-wrapper">
+            <main class="main-content">
+                <!-- Server Management -->
+                <section id="serversSection" class="admin-section active">
+                    <div class="section-header">
+                        <h2>🖥️ Server Management</h2>
+                        <p>Manage game servers and their configurations</p>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="activeUsers">0</div>
-                        <div class="stat-label">Active Today</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalEmotesSent">0</div>
-                        <div class="stat-label">Total Emotes</div>
-                    </div>
-                </div>
-            </div>
 
-            <div id="userList" class="admin-list">
-                <p class="no-data">Click "Refresh Users" to load user data</p>
-            </div>
-        </section>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Add New Server</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="serverForm" class="admin-form">
+                                <input type="hidden" id="editServerId">
+                                <div class="form-grid">
+                                    <input type="text" id="serverName" placeholder="Server Name (e.g., India Server 1)" required class="config-input">
+                                    <input type="url" id="serverUrl" placeholder="https://example.com" required class="config-input">
+                                </div>
+                                <div class="form-grid">
+                                    <select id="serverRegion" required class="config-input">
+                                        <option value="">Select Region</option>
+                                        <option value="indian">🇮🇳 Indian Servers</option>
+                                        <option value="bangladesh">🇧🇩 Bangladesh Servers</option>
+                                        <option value="other">🌍 Other Servers</option>
+                                    </select>
+                                    <input type="number" id="serverOrder" placeholder="Order (1, 2, 3...)" class="config-input" min="1">
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="action-btn">
+                                        <span id="serverBtnText">ADD SERVER</span>
+                                    </button>
+                                    <button type="button" id="cancelServerEdit" class="squad-btn leave hidden">CANCEL</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Existing Servers</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="serverList" class="admin-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Emote Management -->
+                <section id="emotesSection" class="admin-section hidden">
+                    <div class="section-header">
+                        <h2>😊 Emote Management</h2>
+                        <p>Manage emotes and their categories</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Add New Emote</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="emoteForm" class="admin-form">
+                                <input type="hidden" id="editEmoteId">
+                                <div class="form-grid">
+                                    <input type="url" id="emoteImageUrl" placeholder="Image URL" required class="config-input">
+                                    <select id="emoteCategory" required class="config-input">
+                                        <option value="">Select Category</option>
+                                    </select>
+                                </div>
+                                <div id="emotePreview" class="emote-preview-container"></div>
+                                <div class="form-actions">
+                                    <button type="submit" class="action-btn">
+                                        <span id="emoteBtnText">ADD EMOTE</span>
+                                    </button>
+                                    <button type="button" id="cancelEmoteEdit" class="squad-btn leave hidden">CANCEL</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Existing Emotes</h3>
+                            <button id="refreshEmotesBtn" class="action-btn" style="margin-left: 10px; padding: 5px 10px; font-size: 12px;">
+                                <span>🔄 Refresh</span>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="emoteList" class="admin-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Category Management -->
+                <section id="categoriesSection" class="admin-section hidden">
+                    <div class="section-header">
+                        <h2>📂 Category Management</h2>
+                        <p>Organize emotes into categories</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Add New Category</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="categoryForm" class="admin-form">
+                                <input type="hidden" id="editCategoryId">
+                                <div class="form-grid">
+                                    <input type="text" id="categoryName" placeholder="Category Name (e.g., HOT)" required class="config-input">
+                                    <input type="text" id="categoryIcon" placeholder="Icon (e.g., 🔥)" class="config-input">
+                                </div>
+                                <input type="number" id="categoryOrder" placeholder="Order (1, 2, 3...)" class="config-input" min="1">
+                                <div class="form-actions">
+                                    <button type="submit" class="action-btn">
+                                        <span id="categoryBtnText">ADD CATEGORY</span>
+                                    </button>
+                                    <button type="button" id="cancelCategoryEdit" class="squad-btn leave hidden">CANCEL</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Existing Categories</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="categoryList" class="admin-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Footer Links -->
+                <section id="footer-linksSection" class="admin-section hidden">
+                    <div class="section-header">
+                        <h2>🔗 Footer Links</h2>
+                        <p>Manage social media and external links</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Social Media Links</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="linksForm" class="admin-form">
+                                <input type="url" id="telegramUrl" placeholder="Telegram URL" required class="config-input">
+                                <input type="url" id="githubUrl" placeholder="GitHub URL" required class="config-input">
+                                <input type="url" id="discordUrl" placeholder="Discord URL" required class="config-input">
+                                <input type="url" id="youtubeUrl" placeholder="YouTube URL" required class="config-input">
+                                <div class="form-actions">
+                                    <button type="submit" class="action-btn">
+                                        <span>UPDATE LINKS</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Maintenance Mode -->
+                <section id="maintenanceSection" class="admin-section hidden">
+                    <div class="section-header">
+                        <h2>🛠️ Maintenance Mode</h2>
+                        <p>Control site availability and maintenance settings</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Maintenance Settings</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="maintenanceForm" class="admin-form">
+                                <div class="toggle-container">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="maintenanceToggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="toggle-label">Enable Maintenance Mode</span>
+                                </div>
+                                <textarea id="maintenanceMessage" placeholder="Maintenance message for users..." rows="3" class="config-input"></textarea>
+                                <div class="form-actions">
+                                    <button type="submit" class="action-btn">
+                                        <span>SAVE SETTINGS</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Password Manager -->
+                <section id="passwordSection" class="admin-section hidden">
+                    <div class="section-header">
+                        <h2>🔑 Login Password</h2>
+                        <p>Change the admin login password</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Update Password</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="passwordForm" class="admin-form">
+                                <input type="password" id="newPassword" placeholder="New Login Password" required class="config-input">
+                                <div class="form-actions">
+                                    <button type="submit" class="action-btn">
+                                        <span>UPDATE PASSWORD</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- User Management -->
+                <section id="usersSection" class="admin-section hidden">
+                    <div class="section-header">
+                        <h2>👥 User Management</h2>
+                        <p>Monitor and manage user accounts</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>User Statistics</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="userStats" class="user-stats-container">
+                                <div class="stats-grid">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="totalUsers">0</div>
+                                        <div class="stat-label">Total Users</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="activeUsers">0</div>
+                                        <div class="stat-label">Active Today</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="totalEmotesSent">0</div>
+                                        <div class="stat-label">Total Emotes</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>User Controls</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="admin-controls">
+                                <button id="refreshUsersBtn" class="action-btn" style="margin-bottom: 15px;">
+                                    <span>REFRESH USERS</span>
+                                </button>
+                                
+                                <div class="form-grid">
+                                    <input type="text" id="searchUser" placeholder="Search by email or name" class="config-input">
+                                    <select id="filterPlan" class="config-input">
+                                        <option value="">All Plans</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="lifetime">Lifetime</option>
+                                        <option value="free">Free</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>User List</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="userList" class="admin-list">
+                                <p class="no-data">Click "Refresh Users" to load user data</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5-Player Group API -->
+                <section id="group-apiSection" class="admin-section hidden">
+                    <div class="section-header">
+                        <h2>🔢 5-Player Group API</h2>
+                        <p>Manage the 5-player group creation API settings</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>API Configuration</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="groupApiForm" class="admin-form">
+                                <input type="url" id="groupApiUrl" placeholder="https://example.com/5?uid={uid}" required class="config-input">
+                                <div class="toggle-container">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="groupApiEnabled">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="toggle-label">Enable 5-Player Group API</span>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="action-btn">
+                                        <span>SAVE SETTINGS</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
 
     <!-- Loading Spinner -->
