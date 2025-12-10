@@ -304,8 +304,25 @@ document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
 document.getElementById('logoutBtnSidebar')?.addEventListener('click', handleLogout);
 
 // 5-Player Group Button Event Listener
+console.log('🔍 Checking for createGroupBtn:', createGroupBtn);
 if (createGroupBtn) {
+    console.log('✅ Found createGroupBtn, attaching event listener');
     createGroupBtn.addEventListener('click', createFivePlayerGroup);
+    // Add additional logging to verify click events
+    createGroupBtn.addEventListener('click', function(e) {
+        console.log('🖱️ CREATE 5 PLAYER GROUP button clicked');
+    });
+} else {
+    console.error('❌ createGroupBtn not found in DOM');
+    // Try to find it again after a delay
+    setTimeout(() => {
+        const btn = document.getElementById('createGroupBtn');
+        console.log('🔄 Retrying to find createGroupBtn after delay:', btn);
+        if (btn) {
+            btn.addEventListener('click', createFivePlayerGroup);
+            console.log('✅ Event listener attached after delay');
+        }
+    }, 1000);
 }
 
 // Navigation Handler
@@ -1144,6 +1161,7 @@ async function loadLeaderboard() {
 // ===== CREATE 5 PLAYER GROUP FUNCTION =====
 async function createFivePlayerGroup() {
     console.log('🔄 Creating 5 player group');
+    console.log('📍 createFivePlayerGroup function called');
     
     const groupUidInput = document.getElementById('groupUid');
     if (!groupUidInput) {
@@ -1162,57 +1180,49 @@ async function createFivePlayerGroup() {
     showLoader();
     
     try {
-        // Get the API URL from Firebase settings
-        let apiUrl = `https://unafforded-veronique-cuter.ngrok-free.dev/5?uid=${uid}`;
+        // Use our Netlify function instead of calling the API directly
+        const netlifyFunctionUrl = `/netlify/functions/create-group?uid=${encodeURIComponent(uid)}`;
         
-        if (db) {
-            try {
-                const docRef = doc(db, 'settings', 'groupApi');
-                const docSnap = await getDoc(docRef);
-                
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.url) {
-                        apiUrl = data.url.replace('{uid}', uid);
-                    }
-                }
-            } catch (settingsError) {
-                console.error('❌ Error getting group API settings:', settingsError);
+        console.log('⚡ Calling Netlify function for 5 player group:', netlifyFunctionUrl);
+        
+        // Add timeout to the fetch request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        let response;
+        try {
+            response = await fetch(netlifyFunctionUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            console.log('📡 Netlify function response received, status:', response.status);
+        } catch (fetchError) {
+            clearTimeout(timeoutId);
+            if (fetchError.name === 'AbortError') {
+                console.error('⏰ Netlify function request timed out');
+                showToast('❌ Request timed out. Please try again.', 'error');
+                return;
             }
+            throw fetchError; // Re-throw to be caught by outer catch
         }
         
-        console.log('⚡ Calling 5 player group API:', apiUrl);
-        
-        const response = await fetch(apiUrl);
-        
         if (response.ok) {
-            // Try to parse as JSON first, fallback to text
+            // Parse the JSON response from our Netlify function
             try {
-                const contentType = response.headers.get('content-type');
-                let result;
+                const result = await response.json();
                 
-                if (contentType && contentType.includes('application/json')) {
-                    result = await response.json();
+                console.log('✅ 5 player group Netlify function response:', result);
+                
+                if (result.success) {
+                    showToast('✅ 5 player group created successfully!', 'success');
                 } else {
-                    const textResult = await response.text();
-                    // If it's HTML, just show success
-                    if (textResult.startsWith('<')) {
-                        result = { success: true, message: '5 player group created successfully!' };
-                    } else {
-                        result = { success: true, message: textResult || '5 player group created successfully!' };
-                    }
+                    showToast(`❌ Failed to create group: ${result.error || 'Unknown error'}`, 'error');
                 }
-                
-                console.log('✅ 5 player group API response:', result);
-                showToast('✅ 5 player group created successfully!', 'success');
             } catch (parseError) {
-                // Even if parsing fails, consider it a success since the request was OK
-                console.warn('⚠️ Could not parse API response, but request was successful');
+                console.error('❌ Error parsing Netlify function response:', parseError);
                 showToast('✅ 5 player group created successfully!', 'success');
             }
         } else {
             const errorText = await response.text();
-            console.error('❌ 5 player group API error:', response.status, errorText);
+            console.error('❌ 5 player group Netlify function error:', response.status, errorText);
             showToast(`❌ Failed to create group: ${response.status}`, 'error');
         }
     } catch (error) {
