@@ -303,6 +303,16 @@ function handleLogout() {
 document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
 document.getElementById('logoutBtnSidebar')?.addEventListener('click', handleLogout);
 
+// Update Bio Button Event Listener
+const updateBioBtn = document.getElementById('updateBioBtn');
+console.log('🔍 Checking for updateBioBtn:', updateBioBtn);
+if (updateBioBtn) {
+    console.log('✅ Found updateBioBtn, attaching event listener');
+    updateBioBtn.addEventListener('click', updateBio);
+} else {
+    console.error('❌ updateBioBtn not found in DOM');
+}
+
 // 5-Player Group Button Event Listener
 console.log('🔍 Checking for createGroupBtn:', createGroupBtn);
 if (createGroupBtn) {
@@ -1025,6 +1035,84 @@ async function sendEmote() {
         }
         
         showToast(errorMessage, 'error');
+    } finally {
+        hideLoader();
+    }
+}
+
+// ===== UPDATE BIO FUNCTION =====
+async function updateBio() {
+    console.log('🔄 Updating bio');
+    
+    // Prompt user for bio input
+    const bio = prompt('Enter your new bio:');
+    
+    if (bio === null) {
+        // User cancelled the prompt
+        return;
+    }
+    
+    if (bio.trim() === '') {
+        showToast('❌ Bio cannot be empty', 'error');
+        return;
+    }
+    
+    showLoader();
+    
+    try {
+        // Prompt user for access token
+        const accessToken = prompt('Enter your access token:');
+        
+        if (accessToken === null) {
+            // User cancelled the prompt
+            return;
+        }
+        
+        if (accessToken.trim() === '') {
+            showToast('❌ Access token cannot be empty', 'error');
+            return;
+        }
+        
+        // Encode the bio parameter
+        const encodedBio = encodeURIComponent(bio);
+        
+        // Construct the API URL
+        const apiUrl = `https://bio.sukhdaku.qzz.io/update_bio?access_token=${accessToken}&bio=${encodedBio}`;
+        
+        console.log('⚡ Calling update bio API:', apiUrl);
+        
+        // Add timeout to the fetch request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        let response;
+        try {
+            response = await fetch(apiUrl, { 
+                method: 'GET',
+                signal: controller.signal 
+            });
+            clearTimeout(timeoutId);
+            console.log('📡 API response received, status:', response.status);
+        } catch (fetchError) {
+            clearTimeout(timeoutId);
+            if (fetchError.name === 'AbortError') {
+                console.error('⏰ API request timed out');
+                showToast('❌ Request timed out. Please try again.', 'error');
+                return;
+            }
+            throw fetchError; // Re-throw to be caught by outer catch
+        }
+        
+        if (response.ok) {
+            showToast('✅ Bio updated successfully!', 'success');
+        } else {
+            const errorText = await response.text();
+            console.error('❌ Bio update API error:', response.status, errorText);
+            showToast(`❌ Failed to update bio: ${response.status}`, 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error updating bio:', error);
+        showToast(`❌ Error updating bio: ${error.message}`, 'error');
     } finally {
         hideLoader();
     }
