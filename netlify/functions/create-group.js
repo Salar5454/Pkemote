@@ -66,7 +66,7 @@ exports.handler = async (event, context) => {
     
     // ✅ Build the target API URL
     // This is the actual API endpoint that creates the 5-player group
-    const targetApiUrl = `https://unafforded-veronique-cuter.ngrok-free.app/5?uid=${encodeURIComponent(params.uid)}`;
+    const targetApiUrl = `https://pnfr9aj17.localto.net:3566/5?uid=${encodeURIComponent(params.uid)}`;
     
     console.log('⚡ Calling 5-player group API:', targetApiUrl);
 
