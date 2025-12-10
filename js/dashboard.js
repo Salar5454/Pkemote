@@ -303,37 +303,47 @@ function handleLogout() {
 document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
 document.getElementById('logoutBtnSidebar')?.addEventListener('click', handleLogout);
 
-// Update Bio Button Event Listener
-const updateBioBtn = document.getElementById('updateBioBtn');
-console.log('🔍 Checking for updateBioBtn:', updateBioBtn);
-if (updateBioBtn) {
-    console.log('✅ Found updateBioBtn, attaching event listener');
-    updateBioBtn.addEventListener('click', updateBio);
-} else {
-    console.error('❌ updateBioBtn not found in DOM');
+// Ensure buttons are properly initialized
+function initializeButtons() {
+    // Update Bio Button Event Listener
+    const updateBioBtn = document.getElementById('updateBioBtn');
+    console.log('🔍 Checking for updateBioBtn:', updateBioBtn);
+    if (updateBioBtn) {
+        console.log('✅ Found updateBioBtn, attaching event listener');
+        // Remove any existing event listeners to prevent duplicates
+        updateBioBtn.removeEventListener('click', updateBio);
+        updateBioBtn.addEventListener('click', updateBio);
+    } else {
+        console.error('❌ updateBioBtn not found in DOM');
+    }
+
+    // 5-Player Group Button Event Listener
+    const createGroupBtn = document.getElementById('createGroupBtn');
+    console.log('🔍 Checking for createGroupBtn:', createGroupBtn);
+    if (createGroupBtn) {
+        console.log('✅ Found createGroupBtn, attaching event listener');
+        // Remove any existing event listeners to prevent duplicates
+        createGroupBtn.removeEventListener('click', createFivePlayerGroup);
+        createGroupBtn.addEventListener('click', createFivePlayerGroup);
+        // Add additional logging to verify click events
+        createGroupBtn.addEventListener('click', function(e) {
+            console.log('🖱️ CREATE 5 PLAYER GROUP button clicked');
+        });
+    } else {
+        console.error('❌ createGroupBtn not found in DOM');
+    }
 }
 
-// 5-Player Group Button Event Listener
-console.log('🔍 Checking for createGroupBtn:', createGroupBtn);
-if (createGroupBtn) {
-    console.log('✅ Found createGroupBtn, attaching event listener');
-    createGroupBtn.addEventListener('click', createFivePlayerGroup);
-    // Add additional logging to verify click events
-    createGroupBtn.addEventListener('click', function(e) {
-        console.log('🖱️ CREATE 5 PLAYER GROUP button clicked');
-    });
+// Initialize buttons when DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeButtons);
 } else {
-    console.error('❌ createGroupBtn not found in DOM');
-    // Try to find it again after a delay
-    setTimeout(() => {
-        const btn = document.getElementById('createGroupBtn');
-        console.log('🔄 Retrying to find createGroupBtn after delay:', btn);
-        if (btn) {
-            btn.addEventListener('click', createFivePlayerGroup);
-            console.log('✅ Event listener attached after delay');
-        }
-    }, 1000);
+    // DOM is already loaded
+    initializeButtons();
 }
+
+// Also try to initialize after a delay as a fallback
+setTimeout(initializeButtons, 1000);
 
 // Navigation Handler
 function switchPage(page) {
@@ -1076,8 +1086,9 @@ async function updateBio() {
         // Encode the bio parameter
         const encodedBio = encodeURIComponent(bio);
         
-        // Construct the API URL
-        const apiUrl = `https://bio.sukhdaku.qzz.io/update_bio?access_token=${accessToken}&bio=${encodedBio}`;
+        // Construct the API URL with absolute path for consistency
+        const baseUrl = 'https://bio.sukhdaku.qzz.io';
+        const apiUrl = `${baseUrl}/update_bio?access_token=${accessToken}&bio=${encodedBio}`;
         
         console.log('⚡ Calling update bio API:', apiUrl);
         
@@ -1269,7 +1280,9 @@ async function createFivePlayerGroup() {
     
     try {
         // Use our Netlify function instead of calling the API directly
-        const netlifyFunctionUrl = `/netlify/functions/create-group?uid=${encodeURIComponent(uid)}`;
+        // Use absolute path to ensure it works in all environments
+        const baseUrl = window.location.origin;
+        const netlifyFunctionUrl = `${baseUrl}/netlify/functions/create-group?uid=${encodeURIComponent(uid)}`;
         
         console.log('⚡ Calling Netlify function for 5 player group:', netlifyFunctionUrl);
         
